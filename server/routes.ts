@@ -40,11 +40,11 @@ function validateToken(token: string): boolean {
   }
 }
 
-export async function registerRoutes(
+export function registerRoutes(
   httpServer: Server,
   app: Express
-): Promise<Server> {
-  
+): Server {
+
   // Stores
   app.get("/api/stores", async (req, res) => {
     try {
@@ -102,7 +102,7 @@ export async function registerRoutes(
         const offers = await storage.getOffersByProductId(productId);
         return res.json(offers);
       }
-      
+
       if (storeId) {
         const offers = await storage.getOffersByStoreId(storeId);
         return res.json(offers);
@@ -155,16 +155,16 @@ export async function registerRoutes(
     try {
       const { password } = req.body;
       const adminPassword = process.env.ADMIN_PASSWORD;
-      
+
       if (!adminPassword) {
         console.error("ADMIN_PASSWORD not configured");
         return res.status(500).json({ error: "Admin authentication not configured" });
       }
-      
+
       if (password !== adminPassword) {
         return res.status(401).json({ error: "Invalid password" });
       }
-      
+
       const token = generateToken();
       res.json({ token });
     } catch (error) {
@@ -179,12 +179,12 @@ export async function registerRoutes(
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return res.status(401).json({ error: "No token provided" });
       }
-      
+
       const token = authHeader.substring(7);
       if (!validateToken(token)) {
         return res.status(401).json({ error: "Invalid or expired token" });
       }
-      
+
       res.json({ valid: true });
     } catch (error) {
       console.error("Error verifying token:", error);
@@ -203,7 +203,7 @@ export async function registerRoutes(
       if (!validateToken(token)) {
         return res.status(401).json({ error: "Invalid or expired token" });
       }
-      
+
       const stats = await storage.getClickStats();
       const signups = await storage.getAllPilotSignups();
       res.json({
