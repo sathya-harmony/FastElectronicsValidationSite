@@ -84,31 +84,31 @@ export default function SearchPage() {
   }).filter(item => item.offer);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
-      <div className="border-b py-8 bg-white">
+      <div className="border-b border-black/5 pt-24 pb-10 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <h1 className="text-2xl font-semibold">
+          <h1 className="text-3xl font-bold tracking-tight">
             {query ? `Results for "${query}"` : "All Products"}
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <p className="text-muted-foreground mt-2">
             {productsWithOffers.length} products available
           </p>
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-6 py-8 flex-1">
-        <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-12">
+      <main className="max-w-7xl mx-auto px-6 py-12 flex-1">
+        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-16">
           
-          <aside className="hidden lg:block space-y-6">
+          <aside className="hidden lg:block space-y-8">
             <div>
-              <h3 className="font-medium text-sm mb-4">Categories</h3>
-              <div className="space-y-2">
+              <h3 className="font-semibold text-sm mb-5">Categories</h3>
+              <div className="space-y-3">
                 {categories.map(cat => (
                   <button 
                     key={cat} 
-                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors text-left"
+                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors duration-300 text-left"
                   >
                     {cat}
                   </button>
@@ -116,15 +116,15 @@ export default function SearchPage() {
               </div>
             </div>
             
-            <Separator />
+            <Separator className="bg-black/5" />
             
             <div>
-              <h3 className="font-medium text-sm mb-4">Stores</h3>
-              <div className="space-y-2">
+              <h3 className="font-semibold text-sm mb-5">Stores</h3>
+              <div className="space-y-3">
                 {stores.map(store => (
                   <button 
                     key={store.id} 
-                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors text-left"
+                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors duration-300 text-left"
                   >
                     {store.name}
                   </button>
@@ -135,19 +135,24 @@ export default function SearchPage() {
 
           <div>
             {productsWithOffers.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {productsWithOffers.map(({ product, offer }) => (
-                  <ProductCard 
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8">
+                {productsWithOffers.map(({ product, offer }, index) => (
+                  <div 
                     key={product.id} 
-                    product={product} 
-                    offer={offer}
-                    storeName={getStoreById(offer.storeId)?.name}
-                  />
+                    className="animate-fade-in-up"
+                    style={{ animationDelay: `${index * 30}ms` }}
+                  >
+                    <ProductCard 
+                      product={product} 
+                      offer={offer}
+                      storeName={getStoreById(offer.storeId)?.name}
+                    />
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-20">
-                <h3 className="text-lg font-medium mb-2">No results found</h3>
+              <div className="text-center py-24">
+                <h3 className="text-xl font-semibold mb-3">No results found</h3>
                 <p className="text-muted-foreground">Try searching for "Arduino", "Sensor", or "ESP32".</p>
               </div>
             )}

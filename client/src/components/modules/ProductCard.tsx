@@ -46,27 +46,27 @@ export function ProductCard({ product, offer, storeName }: ProductCardProps) {
 
   return (
     <div 
-      className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300" 
+      className="group bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden border border-black/5 hover:border-black/10 premium-shadow hover:premium-shadow-lg hover-lift" 
       data-testid={`card-product-${product.id}`}
     >
-      <div className="aspect-square bg-gray-50 overflow-hidden">
+      <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
         <img 
           src={product.image} 
           alt={product.name} 
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
         />
       </div>
       
-      <div className="p-4 space-y-3">
+      <div className="p-5 space-y-4">
         <div>
-          <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
-          <h3 className="font-medium text-sm leading-tight line-clamp-2 min-h-[2.5rem]">
+          <p className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider mb-1.5">{product.category}</p>
+          <h3 className="font-semibold text-sm leading-snug line-clamp-2 min-h-[2.5rem]">
             {product.name}
           </h3>
         </div>
         
         <div className="flex items-baseline gap-2">
-          <span className="font-semibold text-lg">₹{offer.price.toLocaleString()}</span>
+          <span className="font-bold text-xl tracking-tight">₹{offer.price.toLocaleString()}</span>
           {offer.displayedDeliveryFee > 0 && (
             <span className="text-xs text-muted-foreground">
               +₹{offer.displayedDeliveryFee} delivery
@@ -80,10 +80,10 @@ export function ProductCard({ product, offer, storeName }: ProductCardProps) {
         
         <Button
           onClick={handleAddToCart}
-          className={`w-full rounded-full h-10 font-medium transition-all duration-300 ${
+          className={`w-full rounded-full h-11 font-medium transition-all duration-300 ${
             justAdded || isInCart
-              ? "bg-green-600 hover:bg-green-700"
-              : "bg-gray-900 hover:bg-gray-800"
+              ? "bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20"
+              : "bg-black hover:bg-gray-800 shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-black/25"
           }`}
           data-testid={`button-add-cart-${product.id}`}
         >

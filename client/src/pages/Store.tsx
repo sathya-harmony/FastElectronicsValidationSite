@@ -46,7 +46,7 @@ export default function StorePage() {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center pt-16">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
         <Footer />
@@ -58,8 +58,8 @@ export default function StorePage() {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground">Store not found</p>
+        <div className="flex-1 flex items-center justify-center pt-16">
+          <p className="text-muted-foreground text-lg">Store not found</p>
         </div>
         <Footer />
       </div>
@@ -75,25 +75,24 @@ export default function StorePage() {
   const availableCategories = Array.from(new Set(storeProducts.map(({ product }) => product.category))).sort();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
-      <div className="bg-muted border-b">
-        <div className="h-48 md:h-64 bg-slate-900 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 opacity-90"></div>
-          <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px'}}></div>
+      <div className="relative">
+        <div className="h-64 md:h-80 bg-gradient-to-br from-gray-900 via-gray-800 to-black relative overflow-hidden">
+          <div className="absolute inset-0 opacity-30" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '40px 40px'}}></div>
           
-          <div className="container mx-auto px-4 h-full flex items-end pb-8 relative z-10">
-            <div className="flex flex-col md:flex-row items-start md:items-end gap-6">
-              <div className="h-24 w-24 md:h-32 md:w-32 bg-white rounded-2xl shadow-lg p-2 -mb-12 md:mb-0 border-4 border-background flex items-center justify-center">
-                <span className="text-2xl font-bold text-foreground">{store.name.charAt(0)}</span>
+          <div className="max-w-7xl mx-auto px-6 h-full flex items-end pb-10 relative z-10">
+            <div className="flex flex-col md:flex-row items-start md:items-end gap-6 w-full">
+              <div className="h-28 w-28 md:h-36 md:w-36 bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-3 border-4 border-white/20 flex items-center justify-center -mb-14 md:mb-0">
+                <span className="text-4xl font-bold text-gray-900">{store.name.charAt(0)}</span>
               </div>
-              <div className="mb-2 md:mb-0 text-white">
-                <h1 className="text-3xl md:text-4xl font-bold mb-2">{store.name}</h1>
-                <div className="flex flex-wrap gap-4 text-sm md:text-base opacity-90">
-                  <span className="flex items-center gap-1"><MapPin className="h-4 w-4" /> {store.neighborhood}</span>
-                  <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {store.deliveryTimeRange} delivery</span>
-                  <span className="flex items-center gap-1 text-yellow-400"><Star className="h-4 w-4 fill-current" /> {store.rating} Rating</span>
+              <div className="flex-1 text-white pt-16 md:pt-0">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">{store.name}</h1>
+                <div className="flex flex-wrap gap-5 text-sm md:text-base">
+                  <span className="flex items-center gap-2 text-white/80"><MapPin className="h-4 w-4" /> {store.neighborhood}</span>
+                  <span className="flex items-center gap-2 text-white/80"><Clock className="h-4 w-4" /> {store.deliveryTimeRange} delivery</span>
+                  <span className="flex items-center gap-2 px-3 py-1 bg-yellow-400/20 rounded-full"><Star className="h-4 w-4 fill-yellow-400 text-yellow-400" /> <span className="text-yellow-400 font-semibold">{store.rating}</span></span>
                 </div>
               </div>
             </div>
@@ -101,39 +100,51 @@ export default function StorePage() {
         </div>
       </div>
 
-      <main className="container mx-auto px-4 pt-8 md:pt-12 pb-16 flex-1">
-        <Tabs defaultValue="all" className="space-y-8">
-          <TabsList className="w-full justify-start overflow-x-auto h-auto p-1 bg-transparent border-b rounded-none gap-2">
-            <TabsTrigger value="all" className="rounded-full px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+      <main className="max-w-7xl mx-auto px-6 py-12 md:py-16 flex-1">
+        <Tabs defaultValue="all" className="space-y-10">
+          <TabsList className="w-full justify-start overflow-x-auto h-auto p-1.5 bg-secondary/50 rounded-full gap-1 border border-black/5">
+            <TabsTrigger value="all" className="rounded-full px-5 py-2.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-foreground transition-all duration-300">
               All Products ({storeProducts.length})
             </TabsTrigger>
             {availableCategories.map(cat => (
-              <TabsTrigger key={cat} value={cat} className="rounded-full px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+              <TabsTrigger key={cat} value={cat} className="rounded-full px-5 py-2.5 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-foreground whitespace-nowrap transition-all duration-300">
                 {cat} ({storeProducts.filter(p => p.product.category === cat).length})
               </TabsTrigger>
             ))}
           </TabsList>
 
-          <TabsContent value="all" className="mt-6">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {storeProducts.map(({ product, offer }) => (
-                <ProductCard key={offer.id} product={product} offer={offer} storeName={store.name} />
+          <TabsContent value="all" className="mt-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
+              {storeProducts.map(({ product, offer }, index) => (
+                <div 
+                  key={offer.id} 
+                  className="animate-fade-in-up"
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
+                  <ProductCard product={product} offer={offer} storeName={store.name} />
+                </div>
               ))}
             </div>
             {storeProducts.length === 0 && (
-              <div className="col-span-full text-center py-12 text-muted-foreground">
-                No products found at this store.
+              <div className="col-span-full text-center py-20 text-muted-foreground">
+                <p className="text-lg">No products found at this store.</p>
               </div>
             )}
           </TabsContent>
           
           {availableCategories.map(cat => (
-            <TabsContent key={cat} value={cat} className="mt-6">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <TabsContent key={cat} value={cat} className="mt-8">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
                 {storeProducts
                   .filter(({ product }) => product.category === cat)
-                  .map(({ product, offer }) => (
-                    <ProductCard key={offer.id} product={product} offer={offer} storeName={store.name} />
+                  .map(({ product, offer }, index) => (
+                    <div 
+                      key={offer.id} 
+                      className="animate-fade-in-up"
+                      style={{ animationDelay: `${index * 30}ms` }}
+                    >
+                      <ProductCard product={product} offer={offer} storeName={store.name} />
+                    </div>
                   ))}
               </div>
             </TabsContent>

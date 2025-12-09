@@ -4,9 +4,7 @@ import { Hero } from "@/components/modules/Hero";
 import { ProductCard } from "@/components/modules/ProductCard";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Clock, Star, MapPin } from "lucide-react";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Clock, Star, MapPin, ArrowRight } from "lucide-react";
 
 interface Product {
   id: number;
@@ -75,93 +73,120 @@ export default function Home() {
   }).filter(item => item.offer);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1">
         <Hero />
         
-        {/* Partner Stores Section */}
-        <section className="py-16 bg-secondary/30">
+        <section className="py-24 bg-secondary/30">
           <div className="max-w-7xl mx-auto px-6">
-            <h2 className="text-2xl font-semibold tracking-tight mb-8">Partner Stores</h2>
+            <div className="flex items-end justify-between mb-12">
+              <div>
+                <h2 className="text-3xl font-bold tracking-tight mb-2">Partner Stores</h2>
+                <p className="text-muted-foreground">Premium electronics from trusted local retailers</p>
+              </div>
+              <Link 
+                href="/search?q=" 
+                className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-300"
+              >
+                View all <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
             
             {stores.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {stores.map((store) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {stores.map((store, index) => (
                   <Link key={store.id} href={`/store/${store.id}`}>
-                    <Card 
-                      className="group h-full overflow-hidden hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 border-transparent hover:border-primary/20 bg-white cursor-pointer"
+                    <div 
+                      className="group h-full bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden border border-black/5 hover:border-black/10 premium-shadow hover:premium-shadow-lg hover-lift cursor-pointer animate-fade-in-up"
+                      style={{ animationDelay: `${index * 100}ms` }}
                       data-testid={`card-store-${store.id}`}
                     >
-                      <CardHeader className="p-0">
-                        <div className="h-32 bg-muted relative overflow-hidden">
-                          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 z-10"></div>
-                          <img 
-                            src={store.logo} 
-                            alt={store.name} 
-                            className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
-                          />
-                          <div className="absolute bottom-4 left-4 z-20 flex items-center gap-3">
-                            <div className="h-12 w-12 rounded-lg bg-background p-1 shadow-md">
-                              <img src={store.logo} alt="logo" className="w-full h-full object-contain rounded-md" />
-                            </div>
-                            <div className="text-white">
-                              <h3 className="font-bold text-lg leading-tight">{store.name}</h3>
-                              <div className="flex items-center gap-1 text-xs opacity-90">
-                                <MapPin className="h-3 w-3" /> {store.neighborhood}
-                              </div>
+                      <div className="h-40 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10" />
+                        <img 
+                          src={store.logo} 
+                          alt={store.name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                        />
+                        <div className="absolute bottom-4 left-5 z-20 flex items-center gap-4">
+                          <div className="h-14 w-14 rounded-2xl bg-white/90 backdrop-blur-sm p-2 shadow-xl">
+                            <img src={store.logo} alt="logo" className="w-full h-full object-contain rounded-lg" />
+                          </div>
+                          <div className="text-white">
+                            <h3 className="font-bold text-lg leading-tight">{store.name}</h3>
+                            <div className="flex items-center gap-1.5 text-sm text-white/80">
+                              <MapPin className="h-3.5 w-3.5" /> {store.neighborhood}
                             </div>
                           </div>
                         </div>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-6">
-                        <div className="flex justify-between items-center mb-4">
-                          <Badge variant="secondary" className="font-normal flex gap-1 items-center">
-                            <Clock className="h-3 w-3" /> {store.deliveryTimeRange}
-                          </Badge>
-                          <div className="flex items-center gap-1 text-sm font-semibold text-foreground">
-                            <Star className="h-4 w-4 fill-primary text-primary" />
+                      </div>
+                      
+                      <div className="p-5 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary rounded-full text-xs font-medium">
+                            <Clock className="h-3.5 w-3.5" /> {store.deliveryTimeRange}
+                          </div>
+                          <div className="flex items-center gap-1.5 text-sm font-semibold">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                             {store.rating}
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
+                        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                           {store.description}
                         </p>
-                      </CardContent>
-                      <CardFooter className="p-4 pt-0 flex justify-between items-center text-sm">
-                        <span className="font-medium text-muted-foreground">{store.priceLevel} Pricing</span>
-                        <span className="text-primary font-semibold group-hover:translate-x-1 transition-transform">Visit Store →</span>
-                      </CardFooter>
-                    </Card>
+                        <div className="flex justify-between items-center pt-2">
+                          <span className="text-sm text-muted-foreground">{store.priceLevel} Pricing</span>
+                          <span className="text-sm font-semibold text-foreground group-hover:translate-x-1 transition-transform duration-300 flex items-center gap-1">
+                            Visit Store <ArrowRight className="h-4 w-4" />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </Link>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground">
+              <div className="text-center py-16 text-muted-foreground">
                 <p>No stores available yet.</p>
               </div>
             )}
           </div>
         </section>
         
-        {/* Products Section */}
-        <section className="py-16 bg-white">
+        <section className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-6">
-            <h2 className="text-2xl font-semibold tracking-tight mb-8">Products</h2>
+            <div className="flex items-end justify-between mb-12">
+              <div>
+                <h2 className="text-3xl font-bold tracking-tight mb-2">Featured Products</h2>
+                <p className="text-muted-foreground">Curated selection delivered in 30 minutes</p>
+              </div>
+              <Link 
+                href="/search?q=" 
+                className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-300"
+              >
+                View all <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
             
             {productsWithOffers.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {productsWithOffers.map(({ product, offer }) => (
-                  <ProductCard 
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
+                {productsWithOffers.map(({ product, offer }, index) => (
+                  <div 
                     key={product.id} 
-                    product={product} 
-                    offer={offer}
-                    storeName={getStoreById(offer.storeId)?.name}
-                  />
+                    className="animate-fade-in-up"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <ProductCard 
+                      product={product} 
+                      offer={offer}
+                      storeName={getStoreById(offer.storeId)?.name}
+                    />
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground">
+              <div className="text-center py-16 text-muted-foreground">
                 <p>No products available yet.</p>
               </div>
             )}
