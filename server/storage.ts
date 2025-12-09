@@ -16,7 +16,7 @@ import {
   offers,
   pilotSignups,
   clickEvents
-} from "@shared/schema";
+} from "../shared/schema.js";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, ilike, sql, and, desc, or } from "drizzle-orm";
 import pg from "pg";
