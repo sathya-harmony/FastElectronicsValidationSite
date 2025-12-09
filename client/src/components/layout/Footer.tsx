@@ -1,46 +1,101 @@
 import { Link } from "wouter";
+import { motion } from "framer-motion";
+
+const appleEasing: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05, delayChildren: 0.1 },
+  },
+};
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.4, ease: appleEasing }
+  },
+};
+
+const footerLinks = [
+  {
+    title: "ThunderFast",
+    links: [
+      { href: "/about", label: "About Us" },
+      { href: "/careers", label: "Careers" },
+    ],
+  },
+  {
+    title: "For Stores",
+    links: [
+      { href: "/partner", label: "Become a Partner" },
+      { href: "/admin", label: "Store Dashboard" },
+    ],
+  },
+  {
+    title: "Support",
+    links: [
+      { href: "/help", label: "Help Center" },
+      { href: "/contact", label: "Contact Us" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { href: "/privacy", label: "Privacy Policy" },
+      { href: "/terms", label: "Terms of Service" },
+    ],
+  },
+];
 
 export function Footer() {
   return (
-    <footer className="border-t border-black/5 bg-secondary/30 py-16">
+    <motion.footer 
+      className="border-t border-black/5 bg-secondary/30 py-16"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+      variants={staggerContainer}
+    >
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
-          <div>
-            <h4 className="font-semibold text-sm mb-5">ThunderFast</h4>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/about" className="hover:text-foreground transition-colors duration-300">About Us</Link></li>
-              <li><Link href="/careers" className="hover:text-foreground transition-colors duration-300">Careers</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-sm mb-5">For Stores</h4>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/partner" className="hover:text-foreground transition-colors duration-300">Become a Partner</Link></li>
-              <li><Link href="/admin" className="hover:text-foreground transition-colors duration-300">Store Dashboard</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-sm mb-5">Support</h4>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/help" className="hover:text-foreground transition-colors duration-300">Help Center</Link></li>
-              <li><Link href="/contact" className="hover:text-foreground transition-colors duration-300">Contact Us</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-sm mb-5">Legal</h4>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/privacy" className="hover:text-foreground transition-colors duration-300">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-foreground transition-colors duration-300">Terms of Service</Link></li>
-            </ul>
-          </div>
+          {footerLinks.map((section, sectionIndex) => (
+            <motion.div key={section.title} variants={fadeInUp}>
+              <h4 className="font-semibold text-sm mb-5">{section.title}</h4>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                {section.links.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href}>
+                      <motion.span
+                        className="hover:text-foreground transition-colors duration-300 cursor-pointer"
+                        whileHover={{ x: 4 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {link.label}
+                      </motion.span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
         </div>
-        <div className="border-t border-black/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+        <motion.div 
+          className="border-t border-black/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground"
+          variants={fadeInUp}
+        >
           <p>© 2024 ThunderFast Electronics. All rights reserved.</p>
-          <div className="flex items-center gap-6">
+          <motion.div 
+            className="flex items-center gap-6"
+            whileHover={{ scale: 1.02 }}
+          >
             <span className="font-medium">Bangalore, India</span>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
-    </footer>
+    </motion.footer>
   );
 }

@@ -101,12 +101,29 @@ export class DbStorage implements IStorage {
   }
 
   async searchProducts(query: string): Promise<Product[]> {
-    return await db.select().from(products).where(
+    if (!query.trim()) {
+      return await db.select().from(products);
+    }
+    
+    const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+    
+    if (terms.length === 0) {
+      return await db.select().from(products);
+    }
+    
+    // For each term, check if it matches any field (OR across fields)
+    // Then AND all terms together (product must match ALL terms)
+    const termConditions = terms.map(term => 
       or(
-        sql`${products.name} ILIKE ${`%${query}%`}`,
-        sql`${products.category} ILIKE ${`%${query}%`}`,
-        sql`${products.sku} ILIKE ${`%${query}%`}`
+        sql`LOWER(${products.name}) LIKE ${`%${term}%`}`,
+        sql`LOWER(${products.category}) LIKE ${`%${term}%`}`,
+        sql`LOWER(${products.sku}) LIKE ${`%${term}%`}`,
+        sql`LOWER(${products.shortDesc}) LIKE ${`%${term}%`}`
       )
+    );
+    
+    return await db.select().from(products).where(
+      and(...termConditions)
     );
   }
 

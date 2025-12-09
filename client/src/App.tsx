@@ -10,6 +10,7 @@ import SearchPage from "@/pages/Search";
 import StorePage from "@/pages/Store";
 import CartPage from "@/pages/Cart";
 import AdminDashboard from "@/pages/Admin";
+import ContactPage from "@/pages/Contact";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/stores" component={Home} />
       <Route path="/cart" component={CartPage} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/contact" component={ContactPage} />
       <Route component={NotFound} />
     </Switch>
   );
