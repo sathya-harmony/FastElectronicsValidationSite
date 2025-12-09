@@ -1,0 +1,53 @@
+﻿Product Name (Comm+E3:I44on Listing),Category,Function/Key Feature,Hypothesized SKU,Typical Price Range (INR),Q-Commerce Suitability
+Arduino Uno R3 Compatible Board,Microcontroller/SBC,Prototyping/Learning (ATmega328P),DEV-UNO-R3,400 - 650,Medium (High Value)
+Arduino Nano V3 Compatible (CH340),Microcontroller/SBC,Compact Prototyping (CH340 driver),DEV-NANO-CH340,180 - 250,High (Small Footprint)
+"ESP32 Dev Board (30-pin, CP2102/CH340)",IoT/Wireless Board,"Wi-Fi/BT MCU Module, NodeMCU ",DEV-ESP32-30P,350 - 450,High (Primary IoT item)
+Raspberry Pi Pico,Microcontroller/SBC,"RP2040 MCU, Low Power",DEV-PICO,300 - 400,Medium (High Demand)
+HC-SR04 Ultrasonic Sensor Module,Sensor Module,Distance Measurement (2cm-4m) ,SNS-HCSR04,50 - 80,High (Very Common)
+DHT11 Humidity & Temperature Sensor Module,Sensor Module,Basic Environmental Sensing ,SNS-DHT11-MOD,60 - 100,High (Very Common)
+PIR Motion Sensor (HC-SR501),Sensor Module,Passive Infrared Detection ,SNS-PIR-501,55 - 75,High (Security/Automation)
+555 Timer IC (NE555P),Integrated Circuit,Timer/Oscillator,IC-NE555P,May-15,High (Discrete)
+LM358 Dual Op-Amp IC,Integrated Circuit,General Purpose Op-Amp ,IC-LM358,08-Dec,High (Discrete)
+7805 Voltage Regulator IC (TO-220),Integrated Circuit,5V Fixed Linear Regulator ,IC-7805-T220,08-Dec,High (Discrete)
+L298N Motor Driver Module,Driver Module,Dual H-Bridge DC/Stepper Control,MOD-L298N,150 - 250,Medium (Robotics Essential)
+ULN2003 Driver IC,Integrated Circuit,Darlington Transistor Array,IC-ULN2003,Oct-20,High (Discrete)
+74HC595 Shift Register IC,Integrated Circuit,"8-bit Serial-in, Parallel-out ",IC-74HC595,15 - 30,High (Discrete)
+BC547 NPN Transistor (Pack of 10),Transistor,General Purpose NPN Switching ,TR-BC547-10X,15 - 30,"High (Discrete, Bulk)"
+BC557 PNP Transistor (Pack of 10),Transistor,General Purpose PNP Switching,TR-BC557-10X,15 - 30,"High (Discrete, Bulk)"
+1N4007 Diode (Pack of 50),Diode,General Purpose Rectification ,DIODE-1N4007-50X,25 - 50,"High (Discrete, Bulk)"
+5mm Red LED (Pack of 50),Diode (LED),Indication/Lighting,LED-5MM-RED-50X,20 - 40,"High (Discrete, Bulk)"
+5mm Green LED (Pack of 50),Diode (LED),Indication/Lighting,LED-5MM-GRN-50X,20 - 40,"High (Discrete, Bulk)"
+"10k Ohm Resistor (E12, 1/4W, Pk 100)",Passive Component,Current Limiting/Pull-up ,RES-10K-E12-100X,15 - 30,"High (Discrete, Bulk)"
+"1k Ohm Resistor (E12, 1/4W, Pk 100)",Passive Component,Current Limiting/Pull-up ,RES-1K-E12-100X,15 - 30,"High (Discrete, Bulk)"
+"220 Ohm Resistor (E12, 1/4W, Pk 100)",Passive Component,Current Limiting/LED Drive ,RES-220-E12-100X,15 - 30,"High (Discrete, Bulk)"
+"4.7µF Electrolytic Capacitor (16V, Pk 10)",Passive Component,Filtering/Energy Storage ,CAP-4.7UF-16V-10X,Oct-20,"High (Discrete, Bulk)"
+"100µF Electrolytic Capacitor (16V, Pk 5)",Passive Component,Filtering/Energy Storage ,CAP-100UF-16V-5X,Oct-25,"High (Discrete, Bulk)"
+"0.1µF Ceramic Capacitor (104, Pk 50)",Passive Component,Decoupling/Filtering ,CAP-104-CER-50X,20 - 40,"High (Discrete, Bulk)"
+"22pF Ceramic Capacitor (22, Pk 50)",Passive Component,Clock Stabilization (Crystals) ,CAP-22PF-CER-50X,20 - 40,"High (Discrete, Bulk)"
+SG90 Micro Servo Motor,Motor/Mechanical,"Small Actuator, 9g ",MOT-SG90,120 - 180,Medium (Robotics Essential)
+3.7V 18650 Li-ion Battery (Single Cell),Power Supply,Common Power Source,PWR-18650-3.7V,150 - 300,Medium (High Risk - Compliance needed)
+830 Point Solderless Breadboard,Prototyping Tool,Standard Prototyping Surface ,TOOL-BB-830,80 - 130,High (Low Fragility)
+"Jumper Wire Set (Male-Male, 40 pcs)",Cable/Connector,Interconnection,CBL-JUMP-MM40,60 - 100,High (Low Fragility)
+"Jumper Wire Set (Male-Female, 40 pcs)",Cable/Connector,Interconnection to modules,CBL-JUMP-MF40,60 - 100,High (Low Fragility)
+USB A to Micro B Cable (1m),Cable/Connector,Programming/Powering Boards ,CBL-USB-MICRO,40 - 70,High (Essential Accessory)
+"Female Header 40 Pin (Breakable, Pk 5)",Connector,PCB Interface,CONN-FH40-5X,30 - 50,"High (Discrete, Bulk)"
+Standard 16x2 LCD Display (Green/Blue),Display Module,Basic Text Output,MOD-LCD-16X2,120 - 180,Medium (Standard Display)
+MAX7219 Dot Matrix Module,Display Module,LED Matrix Driver,MOD-MAX7219,150 - 250,Medium (Advanced Display)
+Piezoelectric Buzzer Module (Active),Transducer,Sound/Alarm Output,MOD-BUZZER-ACT,30 - 50,High (Low Cost)
+Digital Voltmeter Ammeter DC 100V 100A,Testing/Tools,Voltage/Current Monitor ,TOOL-VAM-100A,130 - 180,Medium (High Demand Tool)
+SPST ON-OFF Round Rocker Switch (Pk 5),Switch,Simple Power Control ,SW-ROCK-SPST-5X,50 - 75,"High (Discrete, Bulk)"
+LM393 Dual Comparator Module,Integrated Circuit,Voltage Comparison,MOD-LM393,Oct-20,High (Discrete)
+LDR (Photoresistor) Module (Pack of 5),Sensor Module,Light Sensing,SNS-LDR-5X,40 - 60,"High (Discrete, Bulk)"
+IR Sensor Switch E18-D80NK (Adjustable),Sensor Module,Proximity/Obstacle Detection ,SNS-IR-D80NK,280 - 350,Medium (Specialized Sensor)
+"7-Segment Display (Single Digit, Pk 5)",Display Module,Numerical Indicator ,DISP-7SEG-5X,40 - 60,"High (Discrete, Bulk)"
+"Copper Clad Laminate (10x15cm, Single Sided)",PCB/Material,Custom PCB Prototyping,MAT-CCL-SS,70 - 120,Medium (Essential Material)
+"DC Motor 3-6V (TT Motor, Pack of 2)",Motor/Mechanical,Robotics Drive Motor,MOT-TT-2X,80 - 120,High (Robotics Essential)
+Motor Driver Shield for Arduino Uno (L293D/L298P),Driver Module,Stackable Motor Control,SHD-MOT-UNO,200 - 300,Medium (High Value)
+"1N5408 Power Diode (3A, Pack of 10)",Diode,Higher Current Rectification,DIODE-1N5408-10X,20 - 40,"High (Discrete, Bulk)"
+"Potentiometer 10k Ohm (Trimmer, Pk 10)",Passive Component,Variable Resistance/Control,RES-POT-10K-10X,25 - 40,"High (Discrete, Bulk)"
+Lithium Polymer (LiPo) Battery 1000mAh (High C-rate),Power Supply,Drone/Robotics Power,PWR-LIPO-1000,400 - 600,Low (Extreme Risk - Handling Protocol)
+Soldering Iron Tip Cleaning Brass Wire Sponge,Tool/Accessory,Soldering Maintenance ,TOOL-SOLDER-SPONGE,80 - 120,High (Essential Tool)
+USB-TTL Serial Converter (CH340G),Interface Module,Programming/Debugging,MOD-USB-TTL-CH340,70 - 120,High (Essential Accessory)
+"Latching Push Button Switch (12mm, Pk 5)",Switch,General UI Control,SW-PB-LATCH-5X,30 - 50,"High (Discrete, Bulk)"
+3.3V 1A Step-Down Converter Module,Power Module,Efficiency Regulation,MOD-BUCK-3V3,80 - 120,Medium (Essential Power item)
+Water Level Sensor Module (Probe type),Sensor Module,Liquid Detection,SNS-WATER-LEVEL,40 - 70,High (IoT application)

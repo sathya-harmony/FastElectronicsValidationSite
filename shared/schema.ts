@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, integer, serial, timestamp, numeric, jsonb, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, serial, timestamp, numeric, jsonb, varchar, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -26,6 +26,7 @@ export const stores = pgTable("stores", {
   priceLevel: text("price_level").notNull(),
   logo: text("logo").notNull(),
   description: text("description").notNull(),
+  distanceKm: numeric("distance_km", { precision: 5, scale: 2 }).notNull().default("5"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -39,10 +40,13 @@ export type Store = typeof stores.$inferSelect;
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  sku: text("sku").notNull().unique(),
   category: text("category").notNull(),
   shortDesc: text("short_desc").notNull(),
   image: text("image").notNull(),
   specs: jsonb("specs").notNull().$type<string[]>(),
+  datasheetUrl: text("datasheet_url"),
+  suitability: text("suitability"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -57,7 +61,9 @@ export const offers = pgTable("offers", {
   id: serial("id").primaryKey(),
   productId: integer("product_id").notNull().references(() => products.id),
   storeId: integer("store_id").notNull().references(() => stores.id),
+  basePrice: integer("base_price").notNull(),
   price: integer("price").notNull(),
+  displayedDeliveryFee: integer("displayed_delivery_fee").notNull().default(0),
   eta: integer("eta").notNull(),
   stock: integer("stock").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),

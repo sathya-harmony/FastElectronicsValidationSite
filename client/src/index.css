@@ -36,79 +36,70 @@
   --color-chart-5: hsl(var(--chart-5));
 }
 
-/* SLEEK MODERN THEME - White & Electric Teal */
 :root {
-  /* Base */
-  --background: 0 0% 100%; /* Pure White */
-  --foreground: 222 47% 11%; /* Very Dark Blue/Gray */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
 
-  /* Cards & Surfaces */
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card-foreground: 0 0% 9%;
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover-foreground: 0 0% 9%;
 
-  /* Primary Brand Color: Electric Teal */
-  --primary: 185 85% 35%; /* Sharp Teal */
+  --primary: 0 0% 9%;
   --primary-foreground: 0 0% 100%;
 
-  /* Secondary: Soft Cool Gray */
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222 47% 11.2%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 9%;
 
-  /* Muted */
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
 
-  /* Accent: Used for hover states/highlights */
-  --accent: 185 85% 95%; /* Very light teal for backgrounds */
-  --accent-foreground: 185 85% 30%;
+  --accent: 0 0% 96%;
+  --accent-foreground: 0 0% 9%;
 
-  /* Destructive */
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
 
-  /* Borders & Inputs */
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 185 85% 35%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --ring: 0 0% 9%;
 
-  --radius: 0.75rem;
+  --radius: 0.5rem;
 
-  --chart-1: 185 85% 35%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 24%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 27 87% 67%;
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
 }
 
 .dark {
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
+  --background: 0 0% 4%;
+  --foreground: 0 0% 98%;
 
-  --card: 222 47% 11%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222 47% 11%;
-  --popover-foreground: 210 40% 98%;
+  --card: 0 0% 4%;
+  --card-foreground: 0 0% 98%;
+  --popover: 0 0% 4%;
+  --popover-foreground: 0 0% 98%;
 
-  --primary: 185 85% 45%;
-  --primary-foreground: 222 47% 11%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 0 0% 9%;
 
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
+  --secondary: 0 0% 15%;
+  --secondary-foreground: 0 0% 98%;
 
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 64%;
 
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
+  --accent: 0 0% 15%;
+  --accent-foreground: 0 0% 98%;
 
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 0 0% 98%;
 
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 212.7 26.8% 83.9%;
+  --border: 0 0% 15%;
+  --input: 0 0% 15%;
+  --ring: 0 0% 83%;
   
   --chart-1: 220 70% 50%;
   --chart-2: 160 60% 45%;
@@ -123,5 +114,6 @@
   }
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 }

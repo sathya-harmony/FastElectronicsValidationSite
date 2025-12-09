@@ -18,7 +18,7 @@ import {
   clickEvents
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { eq, ilike, sql, and, desc } from "drizzle-orm";
+import { eq, ilike, sql, and, desc, or } from "drizzle-orm";
 import pg from "pg";
 
 const { Pool } = pg;
@@ -34,13 +34,17 @@ export interface IStorage {
   
   getAllProducts(): Promise<Product[]>;
   getProductById(id: number): Promise<Product | undefined>;
+  getProductBySku(sku: string): Promise<Product | undefined>;
   searchProducts(query: string): Promise<Product[]>;
   createProduct(product: InsertProduct): Promise<Product>;
+  deleteAllProducts(): Promise<void>;
   
   getAllOffers(): Promise<Offer[]>;
   getOffersByProductId(productId: number): Promise<Offer[]>;
   getOffersByStoreId(storeId: number): Promise<Offer[]>;
   createOffer(offer: InsertOffer): Promise<Offer>;
+  deleteAllOffers(): Promise<void>;
+  deleteAllStores(): Promise<void>;
   
   createPilotSignup(signup: InsertPilotSignup): Promise<PilotSignup>;
   getAllPilotSignups(): Promise<PilotSignup[]>;
@@ -57,17 +61,14 @@ const db = drizzle(pool);
 
 export class DbStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    // User methods not implemented - not needed for this e-commerce app
     return undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    // User methods not implemented - not needed for this e-commerce app
     return undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    // User methods not implemented - not needed for this e-commerce app
     throw new Error("Not implemented");
   }
 
@@ -94,15 +95,28 @@ export class DbStorage implements IStorage {
     return result[0];
   }
 
+  async getProductBySku(sku: string): Promise<Product | undefined> {
+    const result = await db.select().from(products).where(eq(products.sku, sku));
+    return result[0];
+  }
+
   async searchProducts(query: string): Promise<Product[]> {
     return await db.select().from(products).where(
-      sql`${products.name} ILIKE ${`%${query}%`} OR ${products.category} ILIKE ${`%${query}%`}`
+      or(
+        sql`${products.name} ILIKE ${`%${query}%`}`,
+        sql`${products.category} ILIKE ${`%${query}%`}`,
+        sql`${products.sku} ILIKE ${`%${query}%`}`
+      )
     );
   }
 
   async createProduct(product: InsertProduct): Promise<Product> {
-    const [result] = await db.insert(products).values(product).returning();
-    return result;
+    const result = await db.insert(products).values(product).returning();
+    return result[0];
+  }
+
+  async deleteAllProducts(): Promise<void> {
+    await db.delete(products);
   }
 
   async getAllOffers(): Promise<Offer[]> {
@@ -120,6 +134,14 @@ export class DbStorage implements IStorage {
   async createOffer(offer: InsertOffer): Promise<Offer> {
     const result = await db.insert(offers).values(offer).returning();
     return result[0];
+  }
+
+  async deleteAllOffers(): Promise<void> {
+    await db.delete(offers);
+  }
+
+  async deleteAllStores(): Promise<void> {
+    await db.delete(stores);
   }
 
   async createPilotSignup(signup: InsertPilotSignup): Promise<PilotSignup> {

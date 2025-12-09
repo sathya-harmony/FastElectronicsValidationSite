@@ -1,72 +1,75 @@
-import { Product, Offer, stores } from "@/lib/mockData";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Zap } from "lucide-react";
 import { useState } from "react";
 import { PilotModal } from "./PilotModal";
 
 interface ProductCardProps {
-  product: Product;
-  offer: Offer;
-  compact?: boolean;
+  product: {
+    id: number | string;
+    name: string;
+    category: string;
+    shortDesc: string;
+    image: string;
+    specs: string[];
+  };
+  offer: {
+    id: number | string;
+    productId: number | string;
+    storeId: number | string;
+    price: number;
+    displayedDeliveryFee: number;
+    eta: number;
+    stock: number;
+  };
+  storeName?: string;
 }
 
-export function ProductCard({ product, offer, compact = false }: ProductCardProps) {
+export function ProductCard({ product, offer, storeName }: ProductCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const store = stores.find(s => s.id === offer.storeId);
 
   return (
     <>
-      <Card className="h-full overflow-hidden hover:shadow-md transition-shadow group flex flex-col">
-        <div className="relative aspect-square bg-white p-4 flex items-center justify-center overflow-hidden">
+      <div className="group cursor-pointer" data-testid={`card-product-${product.id}`}>
+        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
           <img 
             src={product.image} 
             alt={product.name} 
-            className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          {offer.stock < 5 && (
-            <Badge variant="destructive" className="absolute top-2 right-2 text-[10px] h-5 px-1.5">
-              Only {offer.stock} left
-            </Badge>
-          )}
         </div>
         
-        <CardContent className="p-4 flex-1 flex flex-col">
-          <div className="text-xs text-muted-foreground mb-1">{product.category}</div>
-          <h3 className="font-semibold text-base leading-tight mb-2 line-clamp-2" title={product.name}>
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">{product.category}</p>
+          <h3 className="font-medium text-sm leading-tight line-clamp-2">
             {product.name}
           </h3>
+          <p className="text-xs text-muted-foreground line-clamp-1">
+            {product.shortDesc}
+          </p>
           
-          {!compact && (
-            <div className="text-xs text-muted-foreground mb-3 space-y-1">
-              {product.specs.slice(0, 2).map((spec, i) => (
-                <div key={i} className="flex items-center gap-1.5">
-                  <span className="h-1 w-1 bg-muted-foreground/50 rounded-full" /> {spec}
-                </div>
-              ))}
-            </div>
-          )}
-          
-          <div className="mt-auto pt-2 border-t border-dashed">
-            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-              <span>Sold by {store?.name}</span>
-              <span className="flex items-center text-green-600 font-medium">
-                <Zap className="h-3 w-3 mr-0.5" fill="currentColor" /> {offer.eta} min
-              </span>
+          <div className="pt-2 flex items-center justify-between">
+            <div>
+              <span className="font-semibold text-base">₹{offer.price.toLocaleString()}</span>
+              {offer.displayedDeliveryFee > 0 && (
+                <span className="text-xs text-muted-foreground ml-2">
+                  +₹{offer.displayedDeliveryFee} delivery
+                </span>
+              )}
             </div>
           </div>
-        </CardContent>
-        
-        <CardFooter className="p-4 pt-0 flex items-center justify-between gap-3">
-          <div className="font-bold text-lg">
-            ₹{offer.price}
+          
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-xs text-muted-foreground">
+              {storeName || 'Store'} · {offer.eta} min
+            </span>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="text-xs font-medium text-foreground hover:underline"
+              data-testid={`button-buy-${product.id}`}
+            >
+              Buy
+            </button>
           </div>
-          <Button size="sm" className="rounded-full px-4" onClick={() => setIsModalOpen(true)}>
-            Buy Now
-          </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
       
       <PilotModal 
         isOpen={isModalOpen} 
