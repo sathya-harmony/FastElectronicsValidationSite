@@ -1,38 +1,163 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { 
+  type User, 
+  type InsertUser,
+  type Store,
+  type InsertStore,
+  type Product,
+  type InsertProduct,
+  type Offer,
+  type InsertOffer,
+  type PilotSignup,
+  type InsertPilotSignup,
+  type ClickEvent,
+  type InsertClickEvent,
+  stores,
+  products,
+  offers,
+  pilotSignups,
+  clickEvents
+} from "@shared/schema";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { eq, ilike, sql, and, desc } from "drizzle-orm";
+import pg from "pg";
 
-// modify the interface with any CRUD methods
-// you might need
+const { Pool } = pg;
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  
+  getAllStores(): Promise<Store[]>;
+  getStoreById(id: number): Promise<Store | undefined>;
+  createStore(store: InsertStore): Promise<Store>;
+  
+  getAllProducts(): Promise<Product[]>;
+  getProductById(id: number): Promise<Product | undefined>;
+  searchProducts(query: string): Promise<Product[]>;
+  createProduct(product: InsertProduct): Promise<Product>;
+  
+  getAllOffers(): Promise<Offer[]>;
+  getOffersByProductId(productId: number): Promise<Offer[]>;
+  getOffersByStoreId(storeId: number): Promise<Offer[]>;
+  createOffer(offer: InsertOffer): Promise<Offer>;
+  
+  createPilotSignup(signup: InsertPilotSignup): Promise<PilotSignup>;
+  getAllPilotSignups(): Promise<PilotSignup[]>;
+  
+  trackClickEvent(event: InsertClickEvent): Promise<ClickEvent>;
+  getClickStats(): Promise<{totalClicks: number, topSearches: {query: string, count: number}[]}>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
-  constructor() {
-    this.users = new Map();
-  }
+const db = drizzle(pool);
 
+export class DbStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    // User methods not implemented - not needed for this e-commerce app
+    return undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    // User methods not implemented - not needed for this e-commerce app
+    return undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+    // User methods not implemented - not needed for this e-commerce app
+    throw new Error("Not implemented");
+  }
+
+  async getAllStores(): Promise<Store[]> {
+    return await db.select().from(stores);
+  }
+
+  async getStoreById(id: number): Promise<Store | undefined> {
+    const result = await db.select().from(stores).where(eq(stores.id, id));
+    return result[0];
+  }
+
+  async createStore(store: InsertStore): Promise<Store> {
+    const result = await db.insert(stores).values(store).returning();
+    return result[0];
+  }
+
+  async getAllProducts(): Promise<Product[]> {
+    return await db.select().from(products);
+  }
+
+  async getProductById(id: number): Promise<Product | undefined> {
+    const result = await db.select().from(products).where(eq(products.id, id));
+    return result[0];
+  }
+
+  async searchProducts(query: string): Promise<Product[]> {
+    return await db.select().from(products).where(
+      sql`${products.name} ILIKE ${`%${query}%`} OR ${products.category} ILIKE ${`%${query}%`}`
+    );
+  }
+
+  async createProduct(product: InsertProduct): Promise<Product> {
+    const [result] = await db.insert(products).values(product).returning();
+    return result;
+  }
+
+  async getAllOffers(): Promise<Offer[]> {
+    return await db.select().from(offers);
+  }
+
+  async getOffersByProductId(productId: number): Promise<Offer[]> {
+    return await db.select().from(offers).where(eq(offers.productId, productId));
+  }
+
+  async getOffersByStoreId(storeId: number): Promise<Offer[]> {
+    return await db.select().from(offers).where(eq(offers.storeId, storeId));
+  }
+
+  async createOffer(offer: InsertOffer): Promise<Offer> {
+    const result = await db.insert(offers).values(offer).returning();
+    return result[0];
+  }
+
+  async createPilotSignup(signup: InsertPilotSignup): Promise<PilotSignup> {
+    const result = await db.insert(pilotSignups).values(signup).returning();
+    return result[0];
+  }
+
+  async getAllPilotSignups(): Promise<PilotSignup[]> {
+    return await db.select().from(pilotSignups).orderBy(desc(pilotSignups.createdAt));
+  }
+
+  async trackClickEvent(event: InsertClickEvent): Promise<ClickEvent> {
+    const result = await db.insert(clickEvents).values(event).returning();
+    return result[0];
+  }
+
+  async getClickStats(): Promise<{totalClicks: number, topSearches: {query: string, count: number}[]}> {
+    const totalClicksResult = await db.select({ count: sql<number>`count(*)` }).from(clickEvents);
+    const totalClicks = Number(totalClicksResult[0]?.count || 0);
+
+    const topSearchesResult = await db
+      .select({ 
+        query: clickEvents.searchQuery, 
+        count: sql<number>`count(*)` 
+      })
+      .from(clickEvents)
+      .where(and(eq(clickEvents.eventType, 'search'), sql`${clickEvents.searchQuery} IS NOT NULL`))
+      .groupBy(clickEvents.searchQuery)
+      .orderBy(desc(sql`count(*)`))
+      .limit(5);
+
+    const topSearches = topSearchesResult.map(r => ({
+      query: r.query || '',
+      count: Number(r.count)
+    }));
+
+    return { totalClicks, topSearches };
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DbStorage();
