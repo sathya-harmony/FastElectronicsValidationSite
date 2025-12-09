@@ -1,0 +1,24 @@
+{
+  "buildCommand": "vite build",
+  "outputDirectory": "dist/public",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/stores/:id*", "destination": "/api/stores" },
+    { "source": "/api/products/search", "destination": "/api/products" },
+    { "source": "/api/products/:id*", "destination": "/api/products" },
+    { "source": "/api/offers", "destination": "/api/offers" },
+    { "source": "/api/pilot-signup", "destination": "/api/pilot-signup" },
+    { "source": "/api/track-event", "destination": "/api/track-event" },
+    { "source": "/api/admin/stats", "destination": "/api/admin/stats" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    }
+  ]
+}
