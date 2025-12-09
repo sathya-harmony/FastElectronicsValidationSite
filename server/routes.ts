@@ -7,19 +7,34 @@ import crypto from "crypto";
 
 const ADMIN_TOKEN_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
 
-function generateToken(): string {
+function getTokenSecret(): string | null {
+  return process.env.ADMIN_PASSWORD || null;
+}
+
+function generateToken(): string | null {
+  const secret = getTokenSecret();
+  if (!secret) return null;
   const timestamp = Date.now().toString();
   const randomBytes = crypto.randomBytes(32).toString("hex");
-  return Buffer.from(`${timestamp}:${randomBytes}`).toString("base64");
+  const payload = `${timestamp}:${randomBytes}`;
+  const signature = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+  return Buffer.from(`${payload}:${signature}`).toString("base64");
 }
 
 function validateToken(token: string): boolean {
+  const secret = getTokenSecret();
+  if (!secret) return false;
   try {
     const decoded = Buffer.from(token, "base64").toString("utf-8");
-    const [timestampStr] = decoded.split(":");
+    const parts = decoded.split(":");
+    if (parts.length !== 3) return false;
+    const [timestampStr, randomBytes, signature] = parts;
     const timestamp = parseInt(timestampStr, 10);
     if (isNaN(timestamp)) return false;
-    return Date.now() - timestamp < ADMIN_TOKEN_EXPIRY;
+    if (Date.now() - timestamp >= ADMIN_TOKEN_EXPIRY) return false;
+    const payload = `${timestampStr}:${randomBytes}`;
+    const expectedSignature = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
   } catch {
     return false;
   }
@@ -177,9 +192,18 @@ export async function registerRoutes(
     }
   });
 
-  // Admin Analytics
+  // Admin Analytics (protected)
   app.get("/api/admin/stats", async (req, res) => {
     try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "No token provided" });
+      }
+      const token = authHeader.substring(7);
+      if (!validateToken(token)) {
+        return res.status(401).json({ error: "Invalid or expired token" });
+      }
+      
       const stats = await storage.getClickStats();
       const signups = await storage.getAllPilotSignups();
       res.json({

@@ -1,10 +1,12 @@
 import type { Handler, HandlerEvent, HandlerContext } from "@netlify/functions";
 import crypto from 'crypto';
 
-function generateToken(): string {
+function generateToken(secret: string): string {
   const timestamp = Date.now().toString();
   const randomBytes = crypto.randomBytes(32).toString("hex");
-  return Buffer.from(`${timestamp}:${randomBytes}`).toString("base64");
+  const payload = `${timestamp}:${randomBytes}`;
+  const signature = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+  return Buffer.from(`${payload}:${signature}`).toString("base64");
 }
 
 export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
@@ -26,7 +28,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       return { statusCode: 401, body: JSON.stringify({ error: "Invalid password" }) };
     }
     
-    const token = generateToken();
+    const token = generateToken(adminPassword);
     return { statusCode: 200, body: JSON.stringify({ token }) };
   } catch (error) {
     console.error('Error in admin login:', error);

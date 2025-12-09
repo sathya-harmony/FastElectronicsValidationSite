@@ -1,10 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'crypto';
 
-function generateToken(): string {
+function generateToken(secret: string): string {
   const timestamp = Date.now().toString();
   const randomBytes = crypto.randomBytes(32).toString("hex");
-  return Buffer.from(`${timestamp}:${randomBytes}`).toString("base64");
+  const payload = `${timestamp}:${randomBytes}`;
+  const signature = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+  return Buffer.from(`${payload}:${signature}`).toString("base64");
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -25,7 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ error: "Invalid password" });
     }
     
-    const token = generateToken();
+    const token = generateToken(adminPassword);
     return res.json({ token });
   } catch (error) {
     console.error('Error in admin login:', error);
