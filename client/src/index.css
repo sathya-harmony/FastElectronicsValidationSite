@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -37,7 +38,7 @@
 }
 
 :root {
-  --background: 0 0% 98%;
+  --background: 0 0% 99%; /* Slightly brighter */
   --foreground: 0 0% 5%;
 
   --card: 0 0% 100%;
@@ -45,26 +46,26 @@
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 5%;
 
-  --primary: 0 0% 5%;
+  --primary: 0 0% 9%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 0 0% 96%;
+  --secondary: 240 4% 96%;
   --secondary-foreground: 0 0% 9%;
 
-  --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 40%;
+  --muted: 240 4% 96%;
+  --muted-foreground: 240 3.8% 46.1%;
 
-  --accent: 211 100% 50%;
-  --accent-foreground: 0 0% 100%;
+  --accent: 240 4% 96%;
+  --accent-foreground: 0 0% 9%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 0 0% 92%;
-  --input: 0 0% 92%;
-  --ring: 211 100% 50%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 240 5% 64.9%;
 
-  --radius: 0.75rem;
+  --radius: 1rem; /* More rounded */
 
   --chart-1: 220 70% 50%;
   --chart-2: 160 60% 45%;
@@ -91,7 +92,7 @@
   --muted: 0 0% 12%;
   --muted-foreground: 0 0% 64%;
 
-  --accent: 211 100% 50%;
+  --accent: 0 0% 12%;
   --accent-foreground: 0 0% 100%;
 
   --destructive: 0 62% 30%;
@@ -99,7 +100,7 @@
 
   --border: 0 0% 12%;
   --input: 0 0% 12%;
-  --ring: 211 100% 50%;
+  --ring: 240 4.9% 83.9%;
   
   --chart-1: 220 70% 50%;
   --chart-2: 160 60% 45%;
@@ -114,9 +115,10 @@
   }
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv11", "ss01";
   }
 }
 
@@ -134,15 +136,17 @@
   }
   
   .glass {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   }
   
   .glass-dark {
     background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
   
   .premium-shadow {

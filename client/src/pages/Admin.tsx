@@ -38,8 +38,8 @@ const staggerContainer = {
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
     transition: { duration: 0.5, ease: appleEasing }
   },
@@ -110,7 +110,7 @@ function LoginForm({ onLogin }: { onLogin: (token: string) => void }) {
                   data-testid="input-admin-password"
                 />
                 {error && (
-                  <motion.p 
+                  <motion.p
                     className="text-red-500 text-sm text-center"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -279,8 +279,8 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      
-      <motion.main 
+
+      <motion.main
         className="flex-1 pt-24 pb-12"
         initial="hidden"
         animate="visible"
@@ -292,8 +292,8 @@ export default function AdminDashboard() {
               <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
               <p className="text-muted-foreground mt-2">Real-time insights for ThunderFast Electronics</p>
             </div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleLogout}
               className="rounded-full"
               data-testid="button-logout"
@@ -301,8 +301,8 @@ export default function AdminDashboard() {
               Logout
             </Button>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             className="grid grid-cols-2 md:grid-cols-5 gap-6 mb-10"
             variants={staggerContainer}
           >
@@ -337,7 +337,7 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </motion.div>
-            
+
             <motion.div variants={fadeInUp}>
               <Card className="border-black/5 premium-shadow hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
@@ -352,7 +352,7 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </motion.div>
-            
+
             <motion.div variants={fadeInUp}>
               <Card className="border-black/5 premium-shadow hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
@@ -367,7 +367,7 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </motion.div>
-            
+
             <motion.div variants={fadeInUp}>
               <Card className="border-black/5 premium-shadow hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
@@ -397,21 +397,21 @@ export default function AdminDashboard() {
                         <BarChart data={stats.topSearches} layout="vertical" margin={{ left: 20, right: 20 }}>
                           <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
                           <XAxis type="number" hide />
-                          <YAxis 
-                            dataKey="query" 
-                            type="category" 
-                            width={100} 
-                            axisLine={false} 
+                          <YAxis
+                            dataKey="query"
+                            type="category"
+                            width={100}
+                            axisLine={false}
                             tickLine={false}
                             tick={{ fontSize: 12 }}
                           />
-                          <Tooltip 
+                          <Tooltip
                             contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                           />
-                          <Bar 
-                            dataKey="count" 
-                            fill="#000" 
-                            radius={[0, 4, 4, 0]} 
+                          <Bar
+                            dataKey="count"
+                            fill="#000"
+                            radius={[0, 4, 4, 0]}
                             barSize={24}
                           />
                         </BarChart>
@@ -441,11 +441,10 @@ export default function AdminDashboard() {
                             cx="50%"
                             cy="50%"
                             innerRadius={60}
-                            outerRadius={100}
+                            outerRadius={80}
                             paddingAngle={2}
                             dataKey="count"
                             label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                            labelLine={false}
                           >
                             {categoryData.map((_, index) => (
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -484,7 +483,7 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody>
                         {stats.recentSignups.map((signup) => (
-                          <motion.tr 
+                          <motion.tr
                             key={signup.id}
                             className="border-b border-black/5 hover:bg-secondary/50 transition-colors"
                             initial={{ opacity: 0, x: -10 }}
@@ -520,15 +519,15 @@ export default function AdminDashboard() {
                   {stores.map((store: any) => {
                     const storeOffers = offers.filter((o: any) => o.storeId === store.id);
                     return (
-                      <div 
-                        key={store.id} 
+                      <div
+                        key={store.id}
                         className="flex items-center justify-between p-3 bg-secondary/30 rounded-xl"
                         data-testid={`store-perf-${store.id}`}
                       >
                         <div className="flex items-center gap-3">
-                          <img 
-                            src={store.logo} 
-                            alt={store.name} 
+                          <img
+                            src={store.logo}
+                            alt={store.name}
                             className="h-10 w-10 rounded-lg object-cover"
                           />
                           <div>
@@ -582,7 +581,7 @@ export default function AdminDashboard() {
           </motion.div>
         </div>
       </motion.main>
-      
+
       <Footer />
     </div>
   );
