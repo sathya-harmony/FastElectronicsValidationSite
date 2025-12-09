@@ -2,9 +2,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Separator } from "@/components/ui/separator";
 import { useLocation } from "wouter";
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { PilotModal } from "@/components/modules/PilotModal";
+import { ProductCard } from "@/components/modules/ProductCard";
 
 interface Product {
   id: number;
@@ -36,7 +35,6 @@ interface Offer {
 export default function SearchPage() {
   const [location] = useLocation();
   const query = new URLSearchParams(location.split('?')[1]).get('q') || '';
-  const [selectedModalProduct, setSelectedModalProduct] = useState<string | null>(null);
 
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["products", "search", query],
@@ -75,19 +73,27 @@ export default function SearchPage() {
   });
 
   const displayProducts = query ? products : allProducts;
-  const categories = Array.from(new Set(allProducts.map(p => p.category)));
+  const categories = Array.from(new Set(allProducts.map(p => p.category))).sort();
+  
+  const getStoreById = (id: number) => stores.find(s => s.id === id);
+
+  const productsWithOffers = displayProducts.map(product => {
+    const productOffers = offers.filter(o => o.productId === product.id);
+    const bestOffer = productOffers.sort((a, b) => a.price - b.price)[0];
+    return { product, offer: bestOffer };
+  }).filter(item => item.offer);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       
-      <div className="border-b py-8">
+      <div className="border-b py-8 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <h1 className="text-2xl font-semibold">
             {query ? `Results for "${query}"` : "All Products"}
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {displayProducts.length} products available
+            {productsWithOffers.length} products available
           </p>
         </div>
       </div>
@@ -127,78 +133,19 @@ export default function SearchPage() {
             </div>
           </aside>
 
-          <div className="space-y-6">
-            {displayProducts.map(product => {
-              const productOffers = offers.filter(o => o.productId === product.id);
-              const minPrice = productOffers.length > 0 
-                ? Math.min(...productOffers.map(o => o.price)) 
-                : 0;
-              
-              return (
-                <div 
-                  key={product.id} 
-                  className="border-b pb-6 last:border-b-0"
-                  data-testid={`product-row-${product.id}`}
-                >
-                  <div className="flex gap-6">
-                    <div className="w-32 h-32 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                      <img 
-                        src={product.image} 
-                        alt={product.name} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
-                      <h3 className="font-medium text-lg mb-1">{product.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-3">{product.shortDesc}</p>
-                      
-                      <div className="flex flex-wrap gap-1.5 mb-4">
-                        {product.specs.slice(0, 4).map((spec, i) => (
-                          <span 
-                            key={i} 
-                            className="text-xs px-2 py-1 bg-gray-100 rounded"
-                          >
-                            {spec}
-                          </span>
-                        ))}
-                      </div>
-                      
-                      {productOffers.length > 0 && (
-                        <div className="space-y-2">
-                          <p className="text-xs text-muted-foreground">
-                            From {productOffers.length} store{productOffers.length > 1 ? 's' : ''} · Starting ₹{minPrice}
-                          </p>
-                          
-                          <div className="flex flex-wrap gap-2">
-                            {productOffers.slice(0, 3).map(offer => {
-                              const store = stores.find(s => s.id === offer.storeId);
-                              return (
-                                <button
-                                  key={offer.id}
-                                  onClick={() => setSelectedModalProduct(product.name)}
-                                  className="inline-flex items-center gap-2 px-3 py-2 text-sm border rounded-md hover:bg-gray-50 transition-colors"
-                                  data-testid={`button-offer-${offer.id}`}
-                                >
-                                  <span className="font-medium">₹{offer.price}</span>
-                                  <span className="text-muted-foreground">·</span>
-                                  <span className="text-muted-foreground">{store?.name}</span>
-                                  <span className="text-muted-foreground">·</span>
-                                  <span className="text-muted-foreground">{offer.eta} min</span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-            
-            {displayProducts.length === 0 && (
+          <div>
+            {productsWithOffers.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {productsWithOffers.map(({ product, offer }) => (
+                  <ProductCard 
+                    key={product.id} 
+                    product={product} 
+                    offer={offer}
+                    storeName={getStoreById(offer.storeId)?.name}
+                  />
+                ))}
+              </div>
+            ) : (
               <div className="text-center py-20">
                 <h3 className="text-lg font-medium mb-2">No results found</h3>
                 <p className="text-muted-foreground">Try searching for "Arduino", "Sensor", or "ESP32".</p>
@@ -208,11 +155,6 @@ export default function SearchPage() {
         </div>
       </main>
       
-      <PilotModal 
-        isOpen={!!selectedModalProduct} 
-        onClose={() => setSelectedModalProduct(null)} 
-        productName={selectedModalProduct || ''}
-      />
       <Footer />
     </div>
   );

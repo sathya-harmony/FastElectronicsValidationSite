@@ -1,11 +1,14 @@
 import { Link, useLocation } from "wouter";
 import { Search, ShoppingBag, User } from "lucide-react";
 import { useState } from "react";
+import { useCart } from "@/lib/cartContext";
 
 export function Header() {
   const [location, setLocation] = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { getItemCount } = useCart();
+  const itemCount = getItemCount();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,9 +42,14 @@ export function Header() {
           <button className="text-muted-foreground hover:text-foreground transition-colors" data-testid="button-user">
             <User className="h-5 w-5" />
           </button>
-          <button className="text-muted-foreground hover:text-foreground transition-colors" data-testid="button-cart">
+          <Link href="/cart" className="relative text-muted-foreground hover:text-foreground transition-colors" data-testid="button-cart">
             <ShoppingBag className="h-5 w-5" />
-          </button>
+            {itemCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-medium rounded-full h-5 w-5 flex items-center justify-center">
+                {itemCount > 9 ? "9+" : itemCount}
+              </span>
+            )}
+          </Link>
         </div>
       </div>
       

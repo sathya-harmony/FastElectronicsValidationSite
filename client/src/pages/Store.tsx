@@ -7,16 +7,6 @@ import { Star, MapPin, Clock, Loader2 } from "lucide-react";
 import { ProductCard } from "@/components/modules/ProductCard";
 import type { Product, Store, Offer } from "@shared/schema";
 
-const CATEGORIES = [
-  "Microcontrollers",
-  "Sensors",
-  "Motors",
-  "Batteries",
-  "Displays",
-  "Communication",
-  "Power",
-  "Accessories"
-];
 
 export default function StorePage() {
   const [, params] = useRoute("/store/:id");
@@ -82,8 +72,10 @@ export default function StorePage() {
     return { product, offer };
   }).filter(item => item.product !== undefined) as { product: Product; offer: Offer }[];
 
+  const availableCategories = Array.from(new Set(storeProducts.map(({ product }) => product.category))).sort();
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       
       <div className="bg-muted border-b">
@@ -93,7 +85,7 @@ export default function StorePage() {
           
           <div className="container mx-auto px-4 h-full flex items-end pb-8 relative z-10">
             <div className="flex flex-col md:flex-row items-start md:items-end gap-6">
-              <div className="h-24 w-24 md:h-32 md:w-32 bg-white rounded-xl shadow-lg p-2 -mb-12 md:mb-0 border-4 border-background flex items-center justify-center">
+              <div className="h-24 w-24 md:h-32 md:w-32 bg-white rounded-2xl shadow-lg p-2 -mb-12 md:mb-0 border-4 border-background flex items-center justify-center">
                 <span className="text-2xl font-bold text-foreground">{store.name.charAt(0)}</span>
               </div>
               <div className="mb-2 md:mb-0 text-white">
@@ -113,11 +105,11 @@ export default function StorePage() {
         <Tabs defaultValue="all" className="space-y-8">
           <TabsList className="w-full justify-start overflow-x-auto h-auto p-1 bg-transparent border-b rounded-none gap-2">
             <TabsTrigger value="all" className="rounded-full px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              All Products
+              All Products ({storeProducts.length})
             </TabsTrigger>
-            {CATEGORIES.map(cat => (
-              <TabsTrigger key={cat} value={cat} className="rounded-full px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                {cat}
+            {availableCategories.map(cat => (
+              <TabsTrigger key={cat} value={cat} className="rounded-full px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap">
+                {cat} ({storeProducts.filter(p => p.product.category === cat).length})
               </TabsTrigger>
             ))}
           </TabsList>
@@ -125,7 +117,7 @@ export default function StorePage() {
           <TabsContent value="all" className="mt-6">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {storeProducts.map(({ product, offer }) => (
-                <ProductCard key={offer.id} product={product} offer={offer} />
+                <ProductCard key={offer.id} product={product} offer={offer} storeName={store.name} />
               ))}
             </div>
             {storeProducts.length === 0 && (
@@ -135,19 +127,14 @@ export default function StorePage() {
             )}
           </TabsContent>
           
-          {CATEGORIES.map(cat => (
+          {availableCategories.map(cat => (
             <TabsContent key={cat} value={cat} className="mt-6">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {storeProducts
                   .filter(({ product }) => product.category === cat)
                   .map(({ product, offer }) => (
-                    <ProductCard key={offer.id} product={product} offer={offer} />
+                    <ProductCard key={offer.id} product={product} offer={offer} storeName={store.name} />
                   ))}
-                {storeProducts.filter(({ product }) => product.category === cat).length === 0 && (
-                  <div className="col-span-full text-center py-12 text-muted-foreground">
-                    No products found in this category at this store.
-                  </div>
-                )}
               </div>
             </TabsContent>
           ))}
