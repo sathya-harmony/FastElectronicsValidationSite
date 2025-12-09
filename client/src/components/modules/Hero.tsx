@@ -1,6 +1,8 @@
 import { Link } from "wouter";
 import heroImage from "@assets/stock_images/robot_holding_drone__274d2016.jpg";
 
+import robert from "@assets/robert.png";
+
 export function Hero() {
   return (
     <section className="relative w-full bg-[#c4c4c4] overflow-hidden">
@@ -24,9 +26,9 @@ export function Hero() {
 
           <div className="relative h-[400px] lg:h-full">
             <img 
-              src={heroImage}
+              src={robert}
               alt="Robot holding drone" 
-              className="absolute inset-0 w-full h-full object-cover object-center"
+              className="absolute inset-0 w-full h-full object-cover object-center pl-[0px] pr-[0px]"
             />
           </div>
         </div>
