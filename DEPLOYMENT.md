@@ -1,6 +1,6 @@
 # ThunderFast Electronics - Deployment Guide
 
-This guide explains how to deploy this application to Vercel or Netlify.
+This guide explains how to deploy this application to Vercel.
 
 ## Prerequisites
 
@@ -9,10 +9,11 @@ This guide explains how to deploy this application to Vercel or Netlify.
 
 ## Environment Variables
 
-Set the following environment variable in your hosting platform:
+Set the following environment variables in your Vercel dashboard:
 
 ```
 DATABASE_URL=postgresql://username:password@host:port/database
+ADMIN_PASSWORD=your_secure_admin_password
 ```
 
 ## Deploying to Vercel
@@ -23,7 +24,7 @@ DATABASE_URL=postgresql://username:password@host:port/database
 2. Clone/download this repository
 3. Run `npm install` to install dependencies
 4. Run `vercel` in the project directory
-5. Set the `DATABASE_URL` environment variable in Vercel dashboard
+5. Set the `DATABASE_URL` and `ADMIN_PASSWORD` environment variables in Vercel dashboard
 
 ### Option 2: Using Vercel Dashboard
 
@@ -33,33 +34,12 @@ DATABASE_URL=postgresql://username:password@host:port/database
    - Build Command: `vite build`
    - Output Directory: `dist/public`
    - Framework Preset: Vite
-4. Add `DATABASE_URL` environment variable
+4. Add environment variables:
+   - `DATABASE_URL` - Your PostgreSQL connection string
+   - `ADMIN_PASSWORD` - Password for the admin dashboard
 5. Deploy
 
 The `vercel.json` file is already configured with the correct rewrites for API routes.
-
-## Deploying to Netlify
-
-### Option 1: Using Netlify CLI
-
-1. Install Netlify CLI: `npm i -g netlify-cli`
-2. Clone/download this repository
-3. Run `npm install` to install dependencies
-4. Run `netlify init` in the project directory
-5. Set the `DATABASE_URL` environment variable in Netlify dashboard
-
-### Option 2: Using Netlify Dashboard
-
-1. Push your code to GitHub/GitLab/Bitbucket
-2. Import the repository in Netlify dashboard
-3. Configure:
-   - Build Command: `vite build`
-   - Publish Directory: `dist/public`
-   - Functions Directory: `netlify/functions`
-4. Add `DATABASE_URL` environment variable
-5. Deploy
-
-The `netlify.toml` file is already configured with the correct redirects for API routes.
 
 ## Database Setup
 
@@ -83,18 +63,12 @@ Or manually execute the SQL schema from `shared/schema.ts`.
 │   ├── pilot-signup.ts     # POST /api/pilot-signup
 │   ├── track-event.ts      # POST /api/track-event
 │   └── admin/
+│       ├── login.ts        # POST /api/admin/login
+│       ├── verify.ts       # GET /api/admin/verify
 │       └── stats.ts        # GET /api/admin/stats
-├── netlify/functions/      # Netlify serverless functions
-│   ├── stores.ts
-│   ├── products.ts
-│   ├── offers.ts
-│   ├── pilot-signup.ts
-│   ├── track-event.ts
-│   └── admin-stats.ts
 ├── client/                 # React frontend
 ├── shared/                 # Shared types and schema
-├── vercel.json             # Vercel configuration
-└── netlify.toml            # Netlify configuration
+└── vercel.json             # Vercel configuration
 ```
 
 ## API Endpoints
@@ -108,11 +82,13 @@ Or manually execute the SQL schema from `shared/schema.ts`.
 | `/api/offers` | GET | List all offers |
 | `/api/pilot-signup` | POST | Create pilot signup |
 | `/api/track-event` | POST | Track click event |
-| `/api/admin/stats` | GET | Get analytics dashboard data |
+| `/api/admin/login` | POST | Admin login (returns auth token) |
+| `/api/admin/verify` | GET | Verify admin auth token |
+| `/api/admin/stats` | GET | Get analytics dashboard data (requires auth) |
 
 ## Local Development
 
-This project runs on Replit with Express.js in development. The serverless functions are used only for Vercel/Netlify deployment.
+This project runs on Replit with Express.js in development. The serverless functions are used only for Vercel deployment.
 
 ```bash
 # Development (on Replit or locally)
@@ -126,8 +102,8 @@ npm start
 ## Troubleshooting
 
 ### Database Connection Issues
-- Ensure your PostgreSQL database allows connections from Vercel/Netlify IP addresses
-- For Neon: Enable "Allow connections from all IPs" or add Vercel/Netlify IPs to allowlist
+- Ensure your PostgreSQL database allows connections from Vercel IP addresses
+- For Neon: Enable "Allow connections from all IPs" or add Vercel IPs to allowlist
 - Use SSL mode: Add `?sslmode=require` to your DATABASE_URL
 
 ### Function Timeout
@@ -137,3 +113,7 @@ npm start
 ### Cold Start Latency
 - First request after inactivity may be slow due to cold starts
 - This is normal behavior for serverless functions
+
+### Admin Access
+- Make sure `ADMIN_PASSWORD` is set in Vercel environment variables
+- The admin dashboard is at `/admin`

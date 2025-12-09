@@ -50,6 +50,7 @@ The schema defines five main entities:
 - Development: Vite dev server with HMR, served through Express middleware
 - Production: Static files built by Vite, served from `dist/public`
 - Build process uses esbuild for server bundling with selective dependency bundling for faster cold starts
+- Deployment: Vercel only (serverless functions in `api/` directory)
 
 ## External Dependencies
 
