@@ -78,8 +78,9 @@ export type Offer = typeof offers.$inferSelect;
 
 export const pilotSignups = pgTable("pilot_signups", {
   id: serial("id").primaryKey(),
-  email: text("email").notNull(),
-  area: text("area").notNull(),
+  email: text("email"),
+  phone: text("phone"),
+  area: text("area"),
   notes: text("notes"),
   productInterest: text("product_interest"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

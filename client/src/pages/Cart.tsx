@@ -3,20 +3,49 @@ import { Footer } from "@/components/layout/Footer";
 import { useCart } from "@/lib/cartContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Minus, Plus, Trash2, ShoppingBag, CheckCircle } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
+import { PRICING_CONFIG } from "@shared/pricingConfig";
 
 export default function CartPage() {
-  const { items, updateQuantity, removeFromCart, getTotal, clearCart } = useCart();
+  const { items, updateQuantity, removeFromCart, getSubtotal, getDeliveryBreakdown, getTotal, clearCart } = useCart();
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [signupSuccess, setSignupSuccess] = useState(false);
+
+  const deliveryBreakdown = getDeliveryBreakdown();
+
+  const pilotSignup = useMutation({
+    mutationFn: async (data: { email: string; phone: string }) => {
+      const res = await fetch("/api/pilot-signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Signup failed");
+      return res.json();
+    },
+    onSuccess: () => {
+      setSignupSuccess(true);
+      clearCart();
+    },
+  });
+
+  const handleSignup = () => {
+    if (email || phone) {
+      pilotSignup.mutate({ email, phone });
+    }
+  };
 
   const groupedByStore = items.reduce((acc, item) => {
     if (!acc[item.storeId]) {
@@ -58,7 +87,12 @@ export default function CartPage() {
             <div className="lg:col-span-2 space-y-6">
               {Object.entries(groupedByStore).map(([storeId, { storeName, items }]) => (
                 <Card key={storeId} className="p-6 rounded-2xl" data-testid={`cart-store-${storeId}`}>
-                  <h3 className="font-semibold mb-4 text-lg">{storeName}</h3>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-semibold text-lg">{storeName}</h3>
+                    <span className="text-sm text-muted-foreground">
+                      Delivery: ₹{PRICING_CONFIG.deliveryFeePerStore}
+                    </span>
+                  </div>
                   <div className="space-y-4">
                     {items.map((item) => (
                       <div
@@ -126,12 +160,30 @@ export default function CartPage() {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>₹{getTotal().toLocaleString()}</span>
+                    <span>₹{getSubtotal().toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Delivery</span>
-                    <span className="text-green-600">Free</span>
+                  
+                  <div className="border-t pt-3 space-y-2">
+                    <span className="text-muted-foreground text-xs font-medium">Delivery Charges</span>
+                    {deliveryBreakdown.storeDeliveryFees.map((store) => (
+                      <div key={store.storeId} className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">{store.storeName}</span>
+                        <span>₹{store.fee}</span>
+                      </div>
+                    ))}
+                    {deliveryBreakdown.transitFee > 0 && (
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Multi-store transit</span>
+                        <span>₹{deliveryBreakdown.transitFee}</span>
+                      </div>
+                    )}
                   </div>
+
+                  <div className="flex justify-between pt-2">
+                    <span className="text-muted-foreground">Total Delivery</span>
+                    <span>₹{deliveryBreakdown.totalDelivery}</span>
+                  </div>
+                  
                   <div className="border-t pt-3 flex justify-between font-semibold text-base">
                     <span>Total</span>
                     <span>₹{getTotal().toLocaleString()}</span>
@@ -163,33 +215,83 @@ export default function CartPage() {
       <Dialog open={showCheckoutModal} onOpenChange={setShowCheckoutModal}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl">Coming Soon!</DialogTitle>
-            <DialogDescription className="pt-4 text-base leading-relaxed">
-              Thank you for your interest in ThunderFast! We're currently in the pilot phase, 
-              validating demand before launching our full delivery service in Bangalore.
-              <br /><br />
-              Your order has been recorded to help us understand customer preferences. 
-              We'll notify you as soon as we launch in your area!
-            </DialogDescription>
+            <DialogTitle className="text-xl">
+              {signupSuccess ? "You're on the list!" : "Coming Soon!"}
+            </DialogTitle>
           </DialogHeader>
-          <div className="flex gap-3 mt-4">
-            <Button
-              variant="outline"
-              className="flex-1 rounded-full"
-              onClick={() => setShowCheckoutModal(false)}
-            >
-              Keep Browsing
-            </Button>
-            <Button
-              className="flex-1 rounded-full"
-              onClick={() => {
-                clearCart();
-                setShowCheckoutModal(false);
-              }}
-            >
-              Join Waitlist
-            </Button>
-          </div>
+          
+          {signupSuccess ? (
+            <div className="text-center py-4">
+              <CheckCircle className="h-16 w-16 mx-auto text-green-500 mb-4" />
+              <p className="text-base text-muted-foreground">
+                Thank you for signing up! Your next order will have <strong>FREE delivery</strong>. 
+                We'll notify you as soon as we launch!
+              </p>
+              <Button
+                className="mt-6 rounded-full"
+                onClick={() => {
+                  setShowCheckoutModal(false);
+                  setSignupSuccess(false);
+                }}
+              >
+                Continue Browsing
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="pt-2 space-y-4">
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  We're currently in pilot phase, validating demand before launching our full delivery service in Bangalore.
+                </p>
+                
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                  <p className="text-sm font-medium text-amber-800">
+                    Sign up now and get <strong>FREE delivery</strong> on your first order!
+                  </p>
+                  <p className="text-xs text-amber-700 mt-2">
+                    Skip the SP Road traffic and long store visits. We'll bring electronics to your doorstep in 30-120 minutes - no more wasting hours navigating Bangalore traffic!
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <Input
+                    type="email"
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="rounded-xl"
+                    data-testid="input-email"
+                  />
+                  <Input
+                    type="tel"
+                    placeholder="Phone number"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="rounded-xl"
+                    data-testid="input-phone"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-3 mt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 rounded-full"
+                  onClick={() => setShowCheckoutModal(false)}
+                >
+                  Maybe Later
+                </Button>
+                <Button
+                  className="flex-1 rounded-full"
+                  onClick={handleSignup}
+                  disabled={!email && !phone}
+                  data-testid="button-join-waitlist"
+                >
+                  {pilotSignup.isPending ? "Signing up..." : "Get Free Delivery"}
+                </Button>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>

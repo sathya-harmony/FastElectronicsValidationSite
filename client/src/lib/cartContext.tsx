@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { PRICING_CONFIG } from "@shared/pricingConfig";
 
 interface CartItemWithDetails {
   offerId: number;
@@ -10,12 +11,20 @@ interface CartItemWithDetails {
   storeId: number;
 }
 
+interface DeliveryBreakdown {
+  storeDeliveryFees: { storeId: number; storeName: string; fee: number }[];
+  transitFee: number;
+  totalDelivery: number;
+}
+
 interface CartContextType {
   items: CartItemWithDetails[];
   addToCart: (item: CartItemWithDetails) => void;
   removeFromCart: (offerId: number) => void;
   updateQuantity: (offerId: number, quantity: number) => void;
   clearCart: () => void;
+  getSubtotal: () => number;
+  getDeliveryBreakdown: () => DeliveryBreakdown;
   getTotal: () => number;
   getItemCount: () => number;
 }
@@ -62,8 +71,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = () => setItems([]);
 
-  const getTotal = () =>
+  const getSubtotal = () =>
     items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const getDeliveryBreakdown = (): DeliveryBreakdown => {
+    const uniqueStores = new Map<number, string>();
+    items.forEach((item) => {
+      if (!uniqueStores.has(item.storeId)) {
+        uniqueStores.set(item.storeId, item.storeName);
+      }
+    });
+
+    const storeDeliveryFees = Array.from(uniqueStores.entries()).map(
+      ([storeId, storeName]) => ({
+        storeId,
+        storeName,
+        fee: PRICING_CONFIG.deliveryFeePerStore,
+      })
+    );
+
+    const storeCount = uniqueStores.size;
+    const transitFee =
+      storeCount > 1
+        ? (storeCount - 1) * PRICING_CONFIG.transitFeeBetweenStores
+        : 0;
+
+    const totalDelivery =
+      storeDeliveryFees.reduce((sum, s) => sum + s.fee, 0) + transitFee;
+
+    return { storeDeliveryFees, transitFee, totalDelivery };
+  };
+
+  const getTotal = () => getSubtotal() + getDeliveryBreakdown().totalDelivery;
 
   const getItemCount = () =>
     items.reduce((sum, item) => sum + item.quantity, 0);
@@ -76,6 +115,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         removeFromCart,
         updateQuantity,
         clearCart,
+        getSubtotal,
+        getDeliveryBreakdown,
         getTotal,
         getItemCount,
       }}
