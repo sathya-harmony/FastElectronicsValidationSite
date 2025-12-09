@@ -260,7 +260,14 @@ export default function CartPage() {
                 </div>
                 <motion.button
                   className="w-full mt-8 rounded-full h-14 text-base font-semibold bg-black text-white shadow-lg shadow-black/20"
-                  onClick={() => setShowCheckoutModal(true)}
+                  onClick={() => {
+                    fetch("/api/track-event", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ eventType: "checkout" }),
+                    }).catch(() => {});
+                    setShowCheckoutModal(true);
+                  }}
                   data-testid="button-checkout"
                   whileHover={{ scale: 1.02, boxShadow: "0 25px 50px -12px rgba(0,0,0,0.3)" }}
                   whileTap={{ scale: 0.98 }}

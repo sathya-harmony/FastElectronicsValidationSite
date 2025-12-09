@@ -3,6 +3,27 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertPilotSignupSchema, insertClickEventSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
+import crypto from "crypto";
+
+const ADMIN_TOKEN_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+
+function generateToken(): string {
+  const timestamp = Date.now().toString();
+  const randomBytes = crypto.randomBytes(32).toString("hex");
+  return Buffer.from(`${timestamp}:${randomBytes}`).toString("base64");
+}
+
+function validateToken(token: string): boolean {
+  try {
+    const decoded = Buffer.from(token, "base64").toString("utf-8");
+    const [timestampStr] = decoded.split(":");
+    const timestamp = parseInt(timestampStr, 10);
+    if (isNaN(timestamp)) return false;
+    return Date.now() - timestamp < ADMIN_TOKEN_EXPIRY;
+  } catch {
+    return false;
+  }
+}
 
 export async function registerRoutes(
   httpServer: Server,
@@ -111,6 +132,48 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error tracking event:", error);
       res.status(500).json({ error: "Failed to track event" });
+    }
+  });
+
+  // Admin Authentication
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { password } = req.body;
+      const adminPassword = process.env.ADMIN_PASSWORD;
+      
+      if (!adminPassword) {
+        console.error("ADMIN_PASSWORD not configured");
+        return res.status(500).json({ error: "Admin authentication not configured" });
+      }
+      
+      if (password !== adminPassword) {
+        return res.status(401).json({ error: "Invalid password" });
+      }
+      
+      const token = generateToken();
+      res.json({ token });
+    } catch (error) {
+      console.error("Error in admin login:", error);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  app.get("/api/admin/verify", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "No token provided" });
+      }
+      
+      const token = authHeader.substring(7);
+      if (!validateToken(token)) {
+        return res.status(401).json({ error: "Invalid or expired token" });
+      }
+      
+      res.json({ valid: true });
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      res.status(500).json({ error: "Verification failed" });
     }
   });
 

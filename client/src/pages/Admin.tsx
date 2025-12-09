@@ -1,13 +1,17 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { motion } from "framer-motion";
-import { TrendingUp, Users, MousePointer, Package, Store, Calendar } from "lucide-react";
+import { TrendingUp, Users, MousePointer, Package, Store, Calendar, ShoppingCart, Lock } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface AdminStats {
   totalClicks: number;
+  checkoutClicks: number;
   topSearches: { query: string; count: number }[];
   signupCount: number;
   recentSignups: {
@@ -41,15 +45,136 @@ const fadeInUp = {
   },
 };
 
+function LoginForm({ onLogin }: { onLogin: (token: string) => void }) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const loginMutation = useMutation({
+    mutationFn: async (password: string) => {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Invalid password");
+      }
+      return res.json();
+    },
+    onSuccess: (data) => {
+      localStorage.setItem("adminToken", data.token);
+      onLogin(data.token);
+    },
+    onError: (err: Error) => {
+      setError(err.message);
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    loginMutation.mutate(password);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header />
+      <main className="flex-1 flex items-center justify-center pt-16">
+        <motion.div
+          className="w-full max-w-md mx-4"
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: appleEasing }}
+        >
+          <Card className="border-black/5 premium-shadow rounded-3xl">
+            <CardHeader className="text-center pb-2">
+              <motion.div
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+              >
+                <Lock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              </motion.div>
+              <CardTitle className="text-2xl font-bold">Admin Access</CardTitle>
+              <p className="text-muted-foreground mt-2">Enter your admin password to continue</p>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-12 rounded-xl border-black/10"
+                  data-testid="input-admin-password"
+                />
+                {error && (
+                  <motion.p 
+                    className="text-red-500 text-sm text-center"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    {error}
+                  </motion.p>
+                )}
+                <Button
+                  type="submit"
+                  className="w-full h-12 rounded-xl bg-black hover:bg-black/90"
+                  disabled={loginMutation.isPending || !password}
+                  data-testid="button-admin-login"
+                >
+                  {loginMutation.isPending ? "Verifying..." : "Login"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("adminToken");
+    if (token) {
+      fetch("/api/admin/verify", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => {
+          if (res.ok) {
+            setAuthToken(token);
+          } else {
+            localStorage.removeItem("adminToken");
+          }
+        })
+        .catch(() => {
+          localStorage.removeItem("adminToken");
+        })
+        .finally(() => {
+          setIsCheckingAuth(false);
+        });
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, []);
+
   const { data: stats, isLoading, error } = useQuery<AdminStats>({
-    queryKey: ["admin-stats"],
+    queryKey: ["admin-stats", authToken],
     queryFn: async () => {
-      const res = await fetch("/api/admin/stats");
+      const res = await fetch("/api/admin/stats", {
+        headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+      });
       if (!res.ok) throw new Error("Failed to fetch stats");
       return res.json();
     },
     refetchInterval: 30000,
+    enabled: !!authToken,
   });
 
   const { data: products = [] } = useQuery<any[]>({
@@ -59,6 +184,7 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error("Failed to fetch products");
       return res.json();
     },
+    enabled: !!authToken,
   });
 
   const { data: stores = [] } = useQuery<any[]>({
@@ -68,6 +194,7 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error("Failed to fetch stores");
       return res.json();
     },
+    enabled: !!authToken,
   });
 
   const { data: offers = [] } = useQuery<any[]>({
@@ -77,6 +204,7 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error("Failed to fetch offers");
       return res.json();
     },
+    enabled: !!authToken,
   });
 
   const categoryData = products.reduce((acc: any[], product: any) => {
@@ -97,6 +225,30 @@ export default function AdminDashboard() {
       minute: '2-digit'
     });
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    setAuthToken(null);
+  };
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-24 flex items-center justify-center">
+          <motion.div
+            className="h-8 w-8 border-2 border-black border-t-transparent rounded-full"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (!authToken) {
+    return <LoginForm onLogin={setAuthToken} />;
+  }
 
   if (isLoading) {
     return (
@@ -135,13 +287,23 @@ export default function AdminDashboard() {
         variants={staggerContainer}
       >
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div variants={fadeInUp} className="mb-10">
-            <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
-            <p className="text-muted-foreground mt-2">Real-time insights for ThunderFast Electronics</p>
+          <motion.div variants={fadeInUp} className="mb-10 flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
+              <p className="text-muted-foreground mt-2">Real-time insights for ThunderFast Electronics</p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={handleLogout}
+              className="rounded-full"
+              data-testid="button-logout"
+            >
+              Logout
+            </Button>
           </motion.div>
           
           <motion.div 
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10"
+            className="grid grid-cols-2 md:grid-cols-5 gap-6 mb-10"
             variants={staggerContainer}
           >
             <motion.div variants={fadeInUp}>
@@ -157,6 +319,21 @@ export default function AdminDashboard() {
                   <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                     <TrendingUp className="h-3 w-3 text-green-500" /> User interactions
                   </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div variants={fadeInUp}>
+              <Card className="border-black/5 premium-shadow hover:shadow-lg transition-shadow bg-gradient-to-br from-emerald-50 to-white">
+                <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-emerald-700">Checkout Clicks</CardTitle>
+                  <ShoppingCart className="h-4 w-4 text-emerald-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-emerald-700" data-testid="stat-checkout-clicks">
+                    {stats?.checkoutClicks?.toLocaleString() || 0}
+                  </div>
+                  <p className="text-xs text-emerald-600 mt-1">Proceed to checkout</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -300,10 +477,8 @@ export default function AdminDashboard() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-black/5">
-                          <th className="text-left py-3 px-4 font-medium text-muted-foreground">Name</th>
                           <th className="text-left py-3 px-4 font-medium text-muted-foreground">Email</th>
                           <th className="text-left py-3 px-4 font-medium text-muted-foreground">Phone</th>
-                          <th className="text-left py-3 px-4 font-medium text-muted-foreground">Area</th>
                           <th className="text-left py-3 px-4 font-medium text-muted-foreground">Signed Up</th>
                         </tr>
                       </thead>
@@ -316,10 +491,8 @@ export default function AdminDashboard() {
                             animate={{ opacity: 1, x: 0 }}
                             data-testid={`signup-row-${signup.id}`}
                           >
-                            <td className="py-3 px-4 font-medium">{signup.name}</td>
-                            <td className="py-3 px-4 text-muted-foreground">{signup.email}</td>
-                            <td className="py-3 px-4 text-muted-foreground">{signup.phone}</td>
-                            <td className="py-3 px-4">{signup.neighborhood}</td>
+                            <td className="py-3 px-4">{signup.email || "-"}</td>
+                            <td className="py-3 px-4 text-muted-foreground">{signup.phone || "-"}</td>
                             <td className="py-3 px-4 text-muted-foreground">{formatDate(signup.createdAt)}</td>
                           </motion.tr>
                         ))}
@@ -387,15 +560,17 @@ export default function AdminDashboard() {
                     <span className="text-muted-foreground">Total Offers</span>
                     <span className="font-semibold" data-testid="stat-offers">{offers.length}</span>
                   </div>
+                  <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-xl">
+                    <span className="text-emerald-700">Checkout Rate</span>
+                    <span className="font-semibold text-emerald-700">
+                      {stats?.totalClicks ? ((stats.checkoutClicks / stats.totalClicks) * 100).toFixed(1) : 0}%
+                    </span>
+                  </div>
                   <div className="flex justify-between items-center p-3 bg-secondary/30 rounded-xl">
                     <span className="text-muted-foreground">Avg. Products/Store</span>
                     <span className="font-semibold">
                       {stores.length > 0 ? (offers.length / stores.length).toFixed(1) : 0}
                     </span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-secondary/30 rounded-xl">
-                    <span className="text-muted-foreground">Categories</span>
-                    <span className="font-semibold">{categoryData.length}</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-secondary/30 rounded-xl">
                     <span className="text-muted-foreground">Data Refresh</span>

@@ -114,6 +114,12 @@ export async function getClickStats() {
   const totalClicksResult = await db.select({ count: sql<number>`count(*)` }).from(clickEvents);
   const totalClicks = Number(totalClicksResult[0]?.count || 0);
 
+  const checkoutClicksResult = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(clickEvents)
+    .where(eq(clickEvents.eventType, 'checkout'));
+  const checkoutClicks = Number(checkoutClicksResult[0]?.count || 0);
+
   const topSearchesResult = await db
     .select({ 
       query: clickEvents.searchQuery, 
@@ -130,5 +136,5 @@ export async function getClickStats() {
     count: Number(r.count)
   }));
 
-  return { totalClicks, topSearches };
+  return { totalClicks, checkoutClicks, topSearches };
 }

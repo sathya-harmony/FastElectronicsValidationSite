@@ -50,7 +50,7 @@ export interface IStorage {
   getAllPilotSignups(): Promise<PilotSignup[]>;
   
   trackClickEvent(event: InsertClickEvent): Promise<ClickEvent>;
-  getClickStats(): Promise<{totalClicks: number, topSearches: {query: string, count: number}[]}>;
+  getClickStats(): Promise<{totalClicks: number, checkoutClicks: number, topSearches: {query: string, count: number}[]}>;
 }
 
 const pool = new Pool({
@@ -175,9 +175,15 @@ export class DbStorage implements IStorage {
     return result[0];
   }
 
-  async getClickStats(): Promise<{totalClicks: number, topSearches: {query: string, count: number}[]}> {
+  async getClickStats(): Promise<{totalClicks: number, checkoutClicks: number, topSearches: {query: string, count: number}[]}> {
     const totalClicksResult = await db.select({ count: sql<number>`count(*)` }).from(clickEvents);
     const totalClicks = Number(totalClicksResult[0]?.count || 0);
+
+    const checkoutClicksResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(clickEvents)
+      .where(eq(clickEvents.eventType, 'checkout'));
+    const checkoutClicks = Number(checkoutClicksResult[0]?.count || 0);
 
     const topSearchesResult = await db
       .select({ 
@@ -195,7 +201,7 @@ export class DbStorage implements IStorage {
       count: Number(r.count)
     }));
 
-    return { totalClicks, topSearches };
+    return { totalClicks, checkoutClicks, topSearches };
   }
 }
 
