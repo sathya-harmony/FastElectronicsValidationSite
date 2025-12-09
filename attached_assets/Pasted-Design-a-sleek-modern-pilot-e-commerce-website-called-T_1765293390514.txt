@@ -1,0 +1,88 @@
+Design a sleek, modern, pilot e‑commerce website called “ThunderFast Electronics” for rapid commerce in Bangalore. The core value proposition: same‑city electronics delivery in 60–120 minutes, starting only in Bangalore, with inventory aggregated from multiple independent electronics shops (like “Vishal Electronics”, “Probot”, “Robocraze”, and others). This is an MVP to test demand, so it should feel trustworthy and high‑end but remain simple and fast to browse.
+
+Overall visual style:
+- Very clean, minimal, white‑dominant layout with soft gray accents, similar to a modern Shopify electronics/drone template.
+- Hero section that echoes the provided reference image: lots of white space, bold left‑aligned typography, large product/robotic imagery to the right.
+- Typography: Sans‑serif, geometric and modern (e.g., Inter, SF‑style, or similar). Large, bold headlines with tight leading, subtle body copy.
+- Primary accent color: one strong, techy color (e.g., electric blue or teal) used for buttons, highlights, and key icons. Secondary accent: a muted warm gray for dividers and subtle backgrounds.
+- Rounded corners on cards and buttons, soft drop‑shadows for depth, micro‑animations on hover.
+- Responsive design for desktop and mobile.
+
+Header and navigation:
+- Top nav with logo “ThunderFast Electronics” on the left, and main links: “Home”, “Stores”, “Products”, “How it Works”, “Contact”.
+- Right side icons for user account and minimal cart/favourite icon (even if not fully functional in MVP).
+- Global search bar prominently centered below the main nav on desktop and at the top on mobile. Placeholder text: “Search electronics in Bangalore (e.g. ‘Arduino’)”.
+
+Hero section (Home page):
+- Full‑width hero with split layout.
+- Left side: big, bold copy such as “Electronics at your door in 60–120 minutes.” and a short subheading describing “From trusted Bangalore electronics stores, delivered fast.” plus two primary CTAs: “Start shopping” and “Browse stores”.
+- Right side: large futuristic product/robot/drone image to mirror the reference style. Add a subtle gradient or soft background blur.
+- Small secondary strip below hero: area/pincode selector for Bangalore (dropdown and text field), plus copy like “Currently serving select Bangalore neighborhoods”.
+
+“Stores in Bangalore” section:
+- A grid of store cards, each representing a partner shop (e.g., “Vishal Electronics”, “Probot”, “Robocraze”).
+- Each card shows: store name, neighborhood (e.g., Koramangala, Indiranagar), average delivery time range (e.g., “~90 minutes”), price indicator (₹₹), rating placeholder (stars), and a “View store” button.
+- On hover (desktop), store card slightly elevates; on click, goes to store detail page.
+
+Store detail page:
+- Store banner with name, logo placeholder, neighborhood, and “Avg delivery 60–120 min”.
+- Tabs or filters for categories like Microcontrollers, Sensors, Robotics Kits, Power & Batteries, Tools & Accessories.
+- Product cards with thumbnail, product name, short spec line, price in rupees, and a “View options” / “See details” button.
+- Clear indication that stock and pricing are local to that specific store.
+
+Search results flow (“Arduino” example):
+- When user types “arduino” in the global search bar and hits enter, route to a dedicated search results page.
+- Page title: “Results for ‘Arduino’ in Bangalore”.
+- At the top, show filters and sort controls: Filter by store, price range slider, delivery ETA buckets (0–60, 60–90, 90–120 minutes), and category.
+- The main results list is grouped by product model, but each row shows multiple stores.
+  - Example list item layout:
+    - Left: Product name (“Arduino Uno R3”), small spec, thumbnail.
+    - Right: a vertical or horizontal list of offers:
+      - “Vishal Electronics – ₹500 – ETA ~90 min – [Buy now]”
+      - “Probot – ₹450 – ETA ~75 min – [Buy now]”
+      - “Robocraze – ₹480 – ETA ~80 min – [Buy now]”
+- Make it very clear that the user is choosing both product and store in one step.
+- Allow sorting by “Lowest price”, “Fastest delivery”, “Best rated store”, and “Closest to me” (even if some are mocked in MVP).
+
+Product detail / offer view:
+- Minimal product detail drawer or page when a user clicks a specific offer.
+- Shows product photos, short bullet specs, what’s included, store info, price, delivery estimate, and “Buy now” as the main button.
+- Below primary button, a secondary text link: “See this item from other stores” that scrolls/jumps to a comparison section listing other store offers for the same SKU.
+
+MVP checkout behavior (pilot mode):
+- For this pilot, clicking any “Buy now” button should not complete a real checkout.
+- After the click, show a modal or full‑page message:
+  - Headline: “Pilot in progress”.
+  - Body: “We’re testing rapid electronics delivery in Bangalore. Ordering will be live soon. Thanks for your interest!”
+  - A small form to “Share your email and area to get early access” with fields (email, area/pincode, optional notes).
+- Include a subtle note: “This website is under construction. No payments are processed yet.”
+
+Admin / analytics requirement (design surface only):
+- Create a separate “Admin” dashboard page (not visible in main nav, but accessible via direct route or tiny footer link).
+- Admin dashboard cards:
+  - Total “Buy now” clicks by day.
+  - Top searched keywords (e.g., “arduino”, “raspberry pi”).
+  - Most clicked stores.
+  - Simple line chart or bar chart component to visualize click volume over time.
+- Use sample dummy data; this is just a UI for tracking demand and interest, not a full analytics platform.
+- Each “Buy now” component in the UI should be wired to an event handler hook or clearly documented so it can be tracked.
+
+“How it Works” section:
+- Simple three‑step visual explanation:
+  1) “Search for an electronic part in Bangalore.”
+  2) “Compare prices and delivery times from multiple local stores.”
+  3) “Place a pilot request — we’ll notify you when live ordering launches.”
+- Use icons or simple illustrations above each step.
+
+Footer:
+- Compact, minimal footer on white background with light gray divider.
+- Columns for: “About ThunderFast”, “For Stores”, “Support”, and “Follow us”.
+- Add a small text line: “Currently serving Bangalore only · Pilot project · Website under construction”.
+
+General UX considerations:
+- Keep every page fast, uncluttered, and mobile‑first.
+- Use sticky search bar and area selector on mobile so users can always change what they’re looking for.
+- Ensure consistent use of the accent color for primary actions (“Buy now”, “Start shopping”) and use outline/ghost styles for secondary actions.
+- Emphasize trust: “Local stores only”, “Fast intracity delivery”, and “Transparent pricing from each shop in Bangalore.”
+
+Build all of the above as a cohesive design system with reusable components: header, hero, store card, product card, offer list row, filters bar, admin stat card, and modal components.
