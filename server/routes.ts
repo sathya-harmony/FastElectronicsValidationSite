@@ -270,6 +270,7 @@ export function registerRoutes(
   function generateInsights(
     stats: {
       totalClicks: number,
+      uniqueVisitors: number,
       checkoutClicks: number,
       paymentMethods: { method: string, count: number }[],
       topSearches: { query: string, count: number }[]
@@ -279,18 +280,22 @@ export function registerRoutes(
     const insights: string[] = [];
 
     // 1. Conversion Analysis
-    if (stats.totalClicks > 0) {
-      const checkoutRate = (stats.checkoutClicks / stats.totalClicks) * 100;
+    if (stats.uniqueVisitors > 0) {
+      const checkoutRate = (stats.checkoutClicks / stats.uniqueVisitors) * 100;
+      const signupRate = (signupCount / stats.uniqueVisitors) * 100;
+
       if (checkoutRate < 5) {
-        insights.push("⚠️ Low Checkout conversion (<5%). Users are browsing but not buying. unexpected high prices might be the cause.");
+        insights.push(`⚠️ Low Checkout Conversion (${checkoutRate.toFixed(1)}%). Users are browsing but not buying. Check pricing.`);
       } else if (checkoutRate > 15) {
-        insights.push("🚀 Strong purchase intent detected! Checkout rate is above 15%, indicating excellent product-market fit.");
+        insights.push(`🚀 Strong Purchase Intent! ${checkoutRate.toFixed(1)}% of visitors attempt checkout.`);
       }
 
-      const signupRate = (signupCount / stats.checkoutClicks) * 100;
-      if (signupRate > 50) {
-        insights.push("⭐ High Trust Signal: Over 50% of users attempting checkout are joining the pilot waitlist.");
+      if (signupRate > 10) {
+        insights.push(`⭐ High Lead Capture: ${signupRate.toFixed(1)}% of visitors are joining the waitlist.`);
       }
+    } else if (stats.totalClicks > 0) {
+      // Fallback if uniqueVisitors is 0 (legacy data)
+      insights.push("ℹ️ Gathering visitor data. Click activity detected.");
     }
 
     // 2. Payment Preferences
@@ -300,7 +305,7 @@ export function registerRoutes(
       const cod = stats.paymentMethods.find(p => p.method === 'cod')?.count || 0;
 
       if ((upi / totalPayments) > 0.6) {
-        insights.push("💳 Digital Native Audience: UPI is heavily preferred (>60%). Ensure QR codes are prominent in the final app.");
+        insights.push("💳 Digital Native Audience: UPI is heavily preferred (>60%). Ensure QR codes are prominent.");
       }
       if ((cod / totalPayments) > 0.4) {
         insights.push("🏠 Traditional Buyers: High COD demand (>40%). Logistics partner must support cash handling.");

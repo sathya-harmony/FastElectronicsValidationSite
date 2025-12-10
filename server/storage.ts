@@ -56,6 +56,7 @@ export interface IStorage {
   trackEventBatch(events: InsertClickEvent[]): Promise<void>;
   getClickStats(): Promise<{
     totalClicks: number,
+    uniqueVisitors: number,
     checkoutClicks: number,
     topSearches: { query: string, count: number }[],
     paymentMethods: { method: string, count: number }[]
@@ -209,12 +210,19 @@ export class DbStorage implements IStorage {
 
   async getClickStats(): Promise<{
     totalClicks: number,
+    uniqueVisitors: number,
     checkoutClicks: number,
     topSearches: { query: string, count: number }[],
     paymentMethods: { method: string, count: number }[]
   }> {
     const totalClicksResult = await db.select({ count: sql<number>`count(*)` }).from(clickEvents);
     const totalClicks = Number(totalClicksResult[0]?.count || 0);
+
+    const uniqueVisitorsResult = await db
+      .select({ count: sql<number>`count(distinct ${clickEvents.sessionId})` })
+      .from(clickEvents)
+      .where(sql`${clickEvents.sessionId} IS NOT NULL`);
+    const uniqueVisitors = Number(uniqueVisitorsResult[0]?.count || 0);
 
     const checkoutClicksResult = await db
       .select({ count: sql<number>`count(*)` })
@@ -253,7 +261,7 @@ export class DbStorage implements IStorage {
       count: Number(r.count)
     }));
 
-    return { totalClicks, checkoutClicks, topSearches, paymentMethods };
+    return { totalClicks, uniqueVisitors, checkoutClicks, topSearches, paymentMethods };
   }
 
   async resetAnalytics(): Promise<void> {

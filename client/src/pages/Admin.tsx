@@ -23,6 +23,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 interface AdminStats {
   totalClicks: number;
+  uniqueVisitors: number;
   checkoutClicks: number;
   topSearches: { query: string; count: number }[];
   paymentMethods: { method: string; count: number }[];
@@ -240,8 +241,8 @@ function PricingControl({ authToken }: { authToken: string | null }) {
             key={option.id}
             onClick={() => mutation.mutate(option.id)}
             className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${currentMode === option.id
-                ? "border-black bg-black text-white shadow-md"
-                : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
+              ? "border-black bg-black text-white shadow-md"
+              : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
               }`}
           >
             <div>
@@ -502,16 +503,31 @@ export default function AdminDashboard() {
             <motion.div variants={fadeInUp}>
               <Card className="border-black/5 premium-shadow hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Clicks</CardTitle>
-                  <MousePointer className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Unique Visitors</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold" data-testid="stat-total-clicks">
-                    {stats?.totalClicks.toLocaleString() || 0}
+                  <div className="text-3xl font-bold" data-testid="stat-unique-visitors">
+                    {stats?.uniqueVisitors?.toLocaleString() || 0}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                    <TrendingUp className="h-3 w-3 text-green-500" /> User interactions
+                    <TrendingUp className="h-3 w-3 text-green-500" /> Distinct sessions
                   </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div variants={fadeInUp}>
+              <Card className="border-black/5 premium-shadow hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Checkout Rate</CardTitle>
+                  <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold" data-testid="stat-checkout-rate">
+                    {stats?.uniqueVisitors ? ((stats.checkoutClicks / stats.uniqueVisitors) * 100).toFixed(1) : 0}%
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Visitors → Checkout</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -535,13 +551,13 @@ export default function AdminDashboard() {
               <Card className="border-black/5 premium-shadow hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
                   <CardTitle className="text-sm font-medium text-muted-foreground">Lead Opt-in Rate</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <Activity className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold" data-testid="stat-optin-rate">
-                    {stats?.totalClicks ? ((stats.signupCount / stats.totalClicks) * 100).toFixed(1) : 0}%
+                    {stats?.uniqueVisitors ? ((stats.signupCount / stats.uniqueVisitors) * 100).toFixed(1) : 0}%
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Waitlist / Visitors</p>
+                  <p className="text-xs text-muted-foreground mt-1">Visitors → Signups</p>
                 </CardContent>
               </Card>
             </motion.div>
