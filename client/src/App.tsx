@@ -43,7 +43,16 @@ function Router() {
   );
 }
 
+import { useState } from "react";
+import Preloader from "@/components/Preloader";
+
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  if (isLoading) {
+    return <Preloader onComplete={() => setIsLoading(false)} />;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
