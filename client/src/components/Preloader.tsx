@@ -80,7 +80,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
             >
                 <div className="mb-8 flex justify-center">
                     <div className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent dark:from-gray-100 dark:to-gray-400">
-                        Pilot Store
+                        ThunderFast
                     </div>
                 </div>
 
@@ -94,7 +94,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                 </div>
 
                 <div className="mt-4 flex justify-between text-xs font-medium text-muted-foreground font-mono">
-                    <span>Initializing store...</span>
+                    <span>Loading site...</span>
                     <span>{progress}%</span>
                 </div>
             </motion.div>
