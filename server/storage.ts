@@ -267,12 +267,12 @@ export class DbStorage implements IStorage {
 
     const paymentMethodsResult = await db
       .select({
-        method: clickEvents.searchQuery,
+        method: sql<string>`metadata->>'methodId'`,
         count: sql<number>`count(*)`
       })
       .from(clickEvents)
       .where(eq(clickEvents.eventType, 'payment_option_selected'))
-      .groupBy(clickEvents.searchQuery)
+      .groupBy(sql`metadata->>'methodId'`)
       .orderBy(desc(sql`count(*)`));
 
     const paymentMethods = paymentMethodsResult.map(r => ({

@@ -18,6 +18,7 @@ const AdminDashboard = React.lazy(() => import("@/pages/Admin"));
 const ContactPage = React.lazy(() => import("@/pages/Contact"));
 const SurveyPage = React.lazy(() => import("@/pages/Survey"));
 const StorePage = React.lazy(() => import("@/pages/Store"));
+const SearchResults = React.lazy(() => import("@/pages/SearchResults"));
 
 function Router() {
   const [location] = useLocation();
@@ -46,6 +47,7 @@ function Router() {
             <Route path="/contact" component={ContactPage} />
             <Route path="/survey" component={SurveyPage} />
             <Route path="/store/:id" component={StorePage} />
+            <Route path="/search" component={SearchResults} />
             <Route component={NotFound} />
           </Switch>
         </Suspense>
