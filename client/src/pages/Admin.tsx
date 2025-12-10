@@ -6,13 +6,26 @@ import { Button } from "@/components/ui/button";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { motion } from "framer-motion";
-import { TrendingUp, Users, MousePointer, Package, Store, Calendar, ShoppingCart, Lock } from "lucide-react";
+import { TrendingUp, Users, MousePointer, Package, Store, Calendar, ShoppingCart, Lock, RotateCcw, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AdminStats {
   totalClicks: number;
   checkoutClicks: number;
   topSearches: { query: string; count: number }[];
+  paymentMethods: { method: string; count: number }[];
   signupCount: number;
   recentSignups: {
     id: number;
@@ -291,15 +304,57 @@ export default function AdminDashboard() {
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
               <p className="text-muted-foreground mt-2">Real-time insights for ThunderFast Electronics</p>
+              <p className="text-muted-foreground mt-2">Real-time insights for ThunderFast Electronics</p>
             </div>
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="rounded-full"
-              data-testid="button-logout"
-            >
-              Logout
-            </Button>
+            <div className="flex gap-3">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="rounded-full gap-2">
+                    <RotateCcw className="h-4 w-4" /> Reset Data
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete all analytics data, including click events, payment attempts, and pilot signups from the database.
+                      <br /><br />
+                      This is intended for resetting data after testing, before a fresh marketing campaign.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-red-600 hover:bg-red-700"
+                      onClick={async () => {
+                        if (!authToken) return;
+                        try {
+                          await fetch("/api/admin/stats", {
+                            method: "DELETE",
+                            headers: { Authorization: `Bearer ${authToken}` },
+                          });
+                          // Invalidate queries to refresh UI
+                          window.location.reload();
+                        } catch (e) {
+                          console.error("Failed to reset", e);
+                        }
+                      }}
+                    >
+                      Yes, Delete Everything
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+                className="rounded-full"
+                data-testid="button-logout"
+              >
+                Logout
+              </Button>
+            </div>
           </motion.div>
 
           <motion.div
@@ -463,6 +518,49 @@ export default function AdminDashboard() {
               </Card>
             </motion.div>
           </div>
+
+          <motion.div variants={fadeInUp} className="mb-10">
+            <Card className="border-black/5 premium-shadow">
+              <CardHeader>
+                <CardTitle className="text-lg">Payment Method Preferences</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {stats?.paymentMethods && stats.paymentMethods.length > 0 ? (
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={stats.paymentMethods} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                        <XAxis
+                          dataKey="method"
+                          axisLine={false}
+                          tickLine={false}
+                          tickFormatter={(value) => value.toUpperCase()}
+                        />
+                        <YAxis
+                          axisLine={false}
+                          tickLine={false}
+                          allowDecimals={false}
+                        />
+                        <Tooltip
+                          cursor={{ fill: '#f4f4f5' }}
+                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                        />
+                        <Bar dataKey="count" fill="#10b981" radius={[8, 8, 0, 0]} barSize={50}>
+                          {stats.paymentMethods.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.method === 'upi' ? '#3b82f6' : entry.method === 'card' ? '#8b5cf6' : '#10b981'} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                    <p>No payment attempts recorded yet.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
 
           <motion.div variants={fadeInUp}>
             <Card className="border-black/5 premium-shadow">

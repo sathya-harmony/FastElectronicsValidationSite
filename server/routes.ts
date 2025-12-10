@@ -217,5 +217,24 @@ export function registerRoutes(
     }
   });
 
+  app.delete("/api/admin/stats", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "No token provided" });
+      }
+      const token = authHeader.substring(7);
+      if (!validateToken(token)) {
+        return res.status(401).json({ error: "Invalid or expired token" });
+      }
+
+      await storage.resetAnalytics();
+      res.json({ success: true, message: "Analytics reset successfully" });
+    } catch (error) {
+      console.error("Error resetting stats:", error);
+      res.status(500).json({ error: "Failed to reset stats" });
+    }
+  });
+
   return httpServer;
 }

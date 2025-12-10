@@ -51,7 +51,14 @@ export interface IStorage {
   getAllPilotSignups(): Promise<PilotSignup[]>;
 
   trackClickEvent(event: InsertClickEvent): Promise<ClickEvent>;
-  getClickStats(): Promise<{ totalClicks: number, checkoutClicks: number, topSearches: { query: string, count: number }[] }>;
+  getClickStats(): Promise<{
+    totalClicks: number,
+    checkoutClicks: number,
+    topSearches: { query: string, count: number }[],
+    paymentMethods: { method: string, count: number }[]
+  }>;
+
+  resetAnalytics(): Promise<void>;
 }
 
 const pool = new Pool({
@@ -188,7 +195,12 @@ export class DbStorage implements IStorage {
     return result[0];
   }
 
-  async getClickStats(): Promise<{ totalClicks: number, checkoutClicks: number, topSearches: { query: string, count: number }[] }> {
+  async getClickStats(): Promise<{
+    totalClicks: number,
+    checkoutClicks: number,
+    topSearches: { query: string, count: number }[],
+    paymentMethods: { method: string, count: number }[]
+  }> {
     const totalClicksResult = await db.select({ count: sql<number>`count(*)` }).from(clickEvents);
     const totalClicks = Number(totalClicksResult[0]?.count || 0);
 
@@ -214,7 +226,27 @@ export class DbStorage implements IStorage {
       count: Number(r.count)
     }));
 
-    return { totalClicks, checkoutClicks, topSearches };
+    const paymentMethodsResult = await db
+      .select({
+        method: clickEvents.searchQuery,
+        count: sql<number>`count(*)`
+      })
+      .from(clickEvents)
+      .where(eq(clickEvents.eventType, 'payment_option_selected'))
+      .groupBy(clickEvents.searchQuery)
+      .orderBy(desc(sql`count(*)`));
+
+    const paymentMethods = paymentMethodsResult.map(r => ({
+      method: r.method || 'Unknown',
+      count: Number(r.count)
+    }));
+
+    return { totalClicks, checkoutClicks, topSearches, paymentMethods };
+  }
+
+  async resetAnalytics(): Promise<void> {
+    await db.delete(clickEvents);
+    await db.delete(pilotSignups);
   }
 }
 
