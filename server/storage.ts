@@ -57,6 +57,7 @@ export interface IStorage {
   getClickStats(): Promise<{
     totalClicks: number,
     uniqueVisitors: number,
+    uniqueCheckoutVisitors: number,
     checkoutClicks: number,
     paymentClicks: number,
     topSearches: { query: string, count: number }[],
@@ -212,6 +213,7 @@ export class DbStorage implements IStorage {
   async getClickStats(): Promise<{
     totalClicks: number,
     uniqueVisitors: number,
+    uniqueCheckoutVisitors: number,
     checkoutClicks: number,
     paymentClicks: number,
     topSearches: { query: string, count: number }[],
@@ -231,6 +233,15 @@ export class DbStorage implements IStorage {
       .from(clickEvents)
       .where(eq(clickEvents.eventType, 'checkout'));
     const checkoutClicks = Number(checkoutClicksResult[0]?.count || 0);
+
+    const uniqueCheckoutVisitorsResult = await db
+      .select({ count: sql<number>`count(distinct ${clickEvents.ipAddress})` })
+      .from(clickEvents)
+      .where(and(
+        eq(clickEvents.eventType, 'checkout'),
+        sql`${clickEvents.ipAddress} IS NOT NULL`
+      ));
+    const uniqueCheckoutVisitors = Number(uniqueCheckoutVisitorsResult[0]?.count || 0);
 
     const paymentClicksResult = await db
       .select({ count: sql<number>`count(*)` })
@@ -269,7 +280,7 @@ export class DbStorage implements IStorage {
       count: Number(r.count)
     }));
 
-    return { totalClicks, uniqueVisitors, checkoutClicks, paymentClicks, topSearches, paymentMethods };
+    return { totalClicks, uniqueVisitors, uniqueCheckoutVisitors, checkoutClicks, paymentClicks, topSearches, paymentMethods };
   }
 
   async resetAnalytics(): Promise<void> {

@@ -275,6 +275,7 @@ export function registerRoutes(
     stats: {
       totalClicks: number,
       uniqueVisitors: number,
+      uniqueCheckoutVisitors: number,
       checkoutClicks: number,
       paymentClicks: number,
       paymentMethods: { method: string, count: number }[],
@@ -286,7 +287,7 @@ export function registerRoutes(
 
     // 1. Conversion Analysis
     if (stats.uniqueVisitors > 0) {
-      const checkoutRate = (stats.checkoutClicks / stats.uniqueVisitors) * 100;
+      const checkoutRate = (stats.uniqueCheckoutVisitors / stats.uniqueVisitors) * 100;
       const signupRate = (signupCount / stats.uniqueVisitors) * 100;
 
       if (checkoutRate < 5) {

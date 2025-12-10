@@ -24,6 +24,7 @@ import { useQueryClient } from "@tanstack/react-query";
 interface AdminStats {
   totalClicks: number;
   uniqueVisitors: number;
+  uniqueCheckoutVisitors: number;
   checkoutClicks: number;
   paymentClicks: number;
   topSearches: { query: string; count: number }[];
@@ -526,7 +527,7 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold" data-testid="stat-checkout-rate">
-                    {stats?.uniqueVisitors ? ((stats.checkoutClicks / stats.uniqueVisitors) * 100).toFixed(1) : 0}%
+                    {stats?.uniqueVisitors ? ((stats.uniqueCheckoutVisitors / stats.uniqueVisitors) * 100).toFixed(1) : 0}%
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">Visitors → Checkout</p>
                 </CardContent>
