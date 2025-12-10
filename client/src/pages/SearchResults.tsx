@@ -3,7 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/modules/ProductCard";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { motion } from "framer-motion";
 import { Search, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,8 @@ const scaleIn = {
 
 export default function SearchResults() {
     const [location] = useLocation();
-    const searchParams = new URLSearchParams(window.location.search);
+    const searchString = useSearch();
+    const searchParams = new URLSearchParams(searchString);
     const query = searchParams.get("q") || "";
 
     useEffect(() => {
