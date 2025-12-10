@@ -1,25 +1,75 @@
 import { useLocation } from "@/lib/locationContext";
 import { PRICING_CONFIG } from "@shared/pricingConfig";
-// ... imports
+import { useCart } from "@/lib/cartContext";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShoppingCart, Check } from "lucide-react";
+import { useState } from "react";
+import { ProductDetailsModal } from "./ProductDetailsModal";
 
-export function ProductCard({ product, offer, storeName }: ProductCardProps) {
+const appleEasing: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
+
+interface ProductCardProps {
+  product: {
+    id: number | string;
+    name: string;
+    category: string;
+    shortDesc: string;
+    longDescription?: string | null;
+    image: string;
+    specs: string[];
+  };
+  offer: {
+    id: number | string;
+    productId: number | string;
+    storeId: number | string;
+    price: number;
+    displayedDeliveryFee: number;
+    eta: number;
+    stock: number;
+  };
+  storeName?: string;
+  store?: {
+    lat?: number | string;
+    lng?: number | string;
+    name: string;
+    distanceKm?: number | string;
+  };
+}
+
+export function ProductCard({ product, offer, storeName, store }: ProductCardProps) {
   const { addToCart, items } = useCart();
   const { userLocation, calculateDistance } = useLocation();
   const [justAdded, setJustAdded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Dynamic Delivery Logic
-  // TODO: Ideally pass store lat/lng in props to avoid doing a fetch inside every card.
-  // For now, allow fallback or refactor Home to pass store coordinates.
-  // Actually, offer.storeId is available. We need store coordinates.
-  // Since we don't have store coords here easily without fetching or prop drilling,
-  // we will rely on the static displayedDeliveryFee BUT updated with a disclaimer or Refactor Home to pass store data.
-
-  // WAIT: Home.tsx has `stores` data with lat/lng? 
-  // Home.tsx fetches stores. It passes `storeName`. It should pass the full `store` object.
-
   const isInCart = items.some(item => item.offerId === Number(offer.id));
-  // ...
+
+  // Dynamic Delivery Calculation
+  let dynamicDeliveryFee = offer.displayedDeliveryFee;
+
+  if (userLocation && store?.lat && store?.lng) {
+    const dist = calculateDistance(userLocation.lat, userLocation.lng, Number(store.lat), Number(store.lng));
+    dynamicDeliveryFee = Math.round(PRICING_CONFIG.deliveryBaseFee + (PRICING_CONFIG.deliveryPerKmFee * dist));
+  } else if (store?.distanceKm) {
+    // Fallback
+    const dist = Number(store.distanceKm);
+    dynamicDeliveryFee = Math.round(PRICING_CONFIG.deliveryBaseFee + (PRICING_CONFIG.deliveryPerKmFee * dist));
+  }
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent opening modal when clicking add to cart
+    addToCart({
+      offerId: Number(offer.id),
+      quantity: 1,
+      productName: product.name,
+      productImage: product.image,
+      price: offer.price,
+      storeName: store?.name || storeName || "Store",
+      storeId: Number(offer.storeId),
+    });
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 1500);
+  };
 
 
   return (
@@ -62,9 +112,9 @@ export function ProductCard({ product, offer, storeName }: ProductCardProps) {
 
           <div className="flex items-baseline gap-2">
             <span className="font-bold text-xl tracking-tight">₹{offer.price.toLocaleString()}</span>
-            {offer.displayedDeliveryFee > 0 && (
+            {dynamicDeliveryFee > 0 && (
               <span className="text-xs text-muted-foreground">
-                +₹{offer.displayedDeliveryFee} delivery
+                +₹{dynamicDeliveryFee} delivery
               </span>
             )}
           </div>
