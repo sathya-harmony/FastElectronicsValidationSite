@@ -49,10 +49,10 @@ export function ProductDetailsModal({ isOpen, onClose, product, offer, storeName
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white/95 backdrop-blur-xl border-none shadow-2xl sm:rounded-3xl">
-                <div className="grid grid-cols-1 md:grid-cols-2 h-[80vh] md:h-[600px]">
+            <DialogContent className="max-w-4xl w-[95vw] p-0 overflow-hidden bg-white/95 backdrop-blur-xl border-none shadow-2xl rounded-2xl sm:rounded-3xl max-h-[90vh]">
+                <div className="flex flex-col md:grid md:grid-cols-2 h-[80vh] md:h-[600px]">
                     {/* Image Section */}
-                    <div className="relative bg-gray-50 flex items-center justify-center p-8 group overflow-hidden">
+                    <div className="relative bg-gray-50 flex items-center justify-center p-8 group overflow-hidden h-64 md:h-full shrink-0">
                         <motion.div
                             className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
                         />
@@ -80,11 +80,11 @@ export function ProductDetailsModal({ isOpen, onClose, product, offer, storeName
                     </div>
 
                     {/* Content Section */}
-                    <div className="flex flex-col h-full bg-white">
+                    <div className="flex flex-col flex-1 min-h-0 bg-white">
                         <div className="p-6 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <h2 className="text-2xl font-bold leading-tight mb-2">{product.name}</h2>
+                                    <h2 className="text-xl md:text-2xl font-bold leading-tight mb-2">{product.name}</h2>
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                         <span className="flex items-center gap-1 text-emerald-600 font-medium">
                                             <Truck className="h-4 w-4" /> {offer.eta} min delivery
@@ -134,12 +134,12 @@ export function ProductDetailsModal({ isOpen, onClose, product, offer, storeName
                         </div>
 
                         {/* Sticky Footer */}
-                        <div className="p-6 border-t bg-gray-50/50 backdrop-blur-sm">
+                        <div className="p-4 md:p-6 border-t bg-gray-50/50 backdrop-blur-sm shrink-0">
                             <motion.button
                                 onClick={handleAddToCart}
                                 className={`w-full h-12 rounded-xl font-medium flex items-center justify-center gap-2 text-lg shadow-lg transition-all ${justAdded
-                                        ? "bg-emerald-600 text-white shadow-emerald-500/25"
-                                        : "bg-black text-white shadow-black/25 hover:shadow-black/40 hover:-translate-y-0.5"
+                                    ? "bg-emerald-600 text-white shadow-emerald-500/25"
+                                    : "bg-black text-white shadow-black/25 hover:shadow-black/40 hover:-translate-y-0.5"
                                     }`}
                                 whileTap={{ scale: 0.98 }}
                             >
