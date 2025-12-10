@@ -1,5 +1,5 @@
 import { storage } from "./storage";
-
+import { type InsertStore, type InsertProduct, type InsertOffer } from "../shared/schema";
 const IMAGES = {
   microcontroller: "/attached_assets/stock_images/arduino_uno_microcon_cb9d942d.jpg",
   esp32: "/attached_assets/stock_images/esp32_wifi_developme_9d46177c.jpg",
@@ -80,7 +80,7 @@ const PRODUCTS_DATA = [
 
 async function seed() {
   console.log("Seeding database...");
-  
+
   await storage.deleteAllOffers();
   await storage.deleteAllProducts();
   await storage.deleteAllStores();
@@ -122,7 +122,7 @@ async function seed() {
   console.log("Created 3 stores");
 
   const createdProducts: { id: number; basePrice: number }[] = [];
-  
+
   for (const productData of PRODUCTS_DATA) {
     const product = await storage.createProduct({
       name: productData.name,
@@ -136,7 +136,7 @@ async function seed() {
     });
     createdProducts.push({ id: product.id, basePrice: productData.basePrice });
   }
-  
+
   console.log(`Created ${createdProducts.length} products`);
 
   const stores = [
@@ -144,24 +144,24 @@ async function seed() {
     { store: store2, distance: 5, margin: 18, skipPercent: 0.25 },
     { store: store3, distance: 12, margin: 12, skipPercent: 0.30 }
   ];
-  
+
   let offerCount = 0;
-  
+
   for (const { store, distance, margin, skipPercent } of stores) {
     for (const product of createdProducts) {
       if (Math.random() < skipPercent) continue;
-      
+
       const priceVariation = 0.95 + Math.random() * 0.1;
       const adjustedBasePrice = Math.round(product.basePrice * priceVariation);
-      
+
       const { price, displayedDeliveryFee } = calculatePrice(adjustedBasePrice, distance, margin);
-      
+
       const etaBase = distance * 5;
       const etaVariation = Math.round(Math.random() * 20);
       const eta = etaBase + etaVariation;
-      
+
       const stock = Math.floor(Math.random() * 50) + 1;
-      
+
       await storage.createOffer({
         productId: product.id,
         storeId: store.id,
@@ -174,7 +174,7 @@ async function seed() {
       offerCount++;
     }
   }
-  
+
   console.log(`Created ${offerCount} offers`);
   console.log("Database seeding complete!");
 }
