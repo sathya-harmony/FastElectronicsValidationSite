@@ -1,9 +1,9 @@
 export const PRICING_CONFIG = {
-  // Delivery Formula: 50 + (12.75 * distance)
-  deliveryBaseFee: 50,
-  deliveryPerKmFee: 15,
+  // Delivery Formula: 29 + (6 * distance)
+  deliveryBaseFee: 29,
+  deliveryPerKmFee: 6,
 
   // Margins & Psychology
-  marginPercentage: 0.30, // 30% margin
+  marginPercentage: 0.20, // 20% margin
   psychologyPricing: true, // Round to nearest 9
 };
