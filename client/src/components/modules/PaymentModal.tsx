@@ -1,8 +1,10 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, CreditCard, Smartphone, Banknote, ArrowRight, Loader2 } from "lucide-react";
+import { CheckCircle, CreditCard, Smartphone, Banknote, ArrowRight, Loader2, Sparkles, Mail, Phone } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/lib/cartContext";
+import { Input } from "@/components/ui/input";
+import { useMutation } from "@tanstack/react-query";
 
 interface PaymentModalProps {
     isOpen: boolean;
@@ -36,8 +38,26 @@ const PAYMENT_METHODS = [
 
 export function PaymentModal({ isOpen, onClose, totalAmount }: PaymentModalProps) {
     const { clearCart } = useCart();
-    const [step, setStep] = useState<"select" | "processing" | "success">("select");
+    const [step, setStep] = useState<"select" | "processing" | "signup" | "success">("select");
     const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+
+    const pilotSignup = useMutation({
+        mutationFn: async (data: { email: string; phone: string }) => {
+            const res = await fetch("/api/pilot-signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
+            if (!res.ok) throw new Error("Signup failed");
+            return res.json();
+        },
+        onSuccess: () => {
+            setStep("success");
+            clearCart();
+        },
+    });
 
     const handlePaymentSelect = async (methodId: string) => {
         setSelectedMethod(methodId);
@@ -49,7 +69,7 @@ export function PaymentModal({ isOpen, onClose, totalAmount }: PaymentModalProps
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     eventType: "payment_option_selected",
-                    searchQuery: methodId // Reusing field for details
+                    searchQuery: methodId
                 }),
             });
         } catch (e) {
@@ -58,17 +78,24 @@ export function PaymentModal({ isOpen, onClose, totalAmount }: PaymentModalProps
 
         setStep("processing");
 
-        // Simulate processing delay
+        // Simulate processing delay then move to signup
         setTimeout(() => {
-            setStep("success");
-            clearCart();
+            setStep("signup");
         }, 2000);
+    };
+
+    const handleSignup = () => {
+        if (email || phone) {
+            pilotSignup.mutate({ email, phone });
+        }
     };
 
     const handleClose = () => {
         if (step === "success") {
             setStep("select");
             setSelectedMethod(null);
+            setEmail("");
+            setPhone("");
             onClose();
         } else {
             onClose();
@@ -134,6 +161,92 @@ export function PaymentModal({ isOpen, onClose, totalAmount }: PaymentModalProps
                             <p className="text-muted-foreground text-center text-sm">
                                 Connecting to secure gateway...
                             </p>
+                        </motion.div>
+                    )}
+
+                    {step === "signup" && (
+                        <motion.div
+                            key="signup"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 1.05 }}
+                            className="p-8 text-center relative overflow-hidden"
+                        >
+                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-400 animate-shimmer" />
+
+                            <DialogHeader className="mb-8">
+                                <motion.div
+                                    initial={{ rotate: -10, scale: 0 }}
+                                    animate={{ rotate: 0, scale: 1 }}
+                                    transition={{ type: "spring", delay: 0.2 }}
+                                    className="mx-auto w-16 h-16 bg-gradient-to-tr from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-4 shadow-inner"
+                                >
+                                    <Sparkles className="h-8 w-8 text-amber-600" />
+                                </motion.div>
+                                <DialogTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+                                    Priority Access Unlocked
+                                </DialogTitle>
+                                <p className="text-muted-foreground mt-2 leading-relaxed">
+                                    You're clearly serious about electronics. We're currently in an exclusive pilot phase.
+                                </p>
+                            </DialogHeader>
+
+                            <div className="space-y-4 mb-6 text-left">
+                                <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4">
+                                    <p className="text-sm text-emerald-800 font-medium text-center">
+                                        Join now for <span className="font-bold underline">Lifetime Free Delivery</span> on pilot orders!
+                                    </p>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="relative">
+                                        <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                                        <Input
+                                            type="email"
+                                            placeholder="Email Address"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            className="pl-10 h-12 bg-gray-50/50 border-gray-200 focus:bg-white transition-all rounded-xl"
+                                        />
+                                    </div>
+                                    <div className="relative">
+                                        <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                                        <Input
+                                            type="tel"
+                                            placeholder="Phone Number"
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            className="pl-10 h-12 bg-gray-50/50 border-gray-200 focus:bg-white transition-all rounded-xl"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <motion.button
+                                className="w-full h-12 bg-black text-white font-bold rounded-xl shadow-lg shadow-black/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={handleSignup}
+                                disabled={(!email && !phone) || pilotSignup.isPending}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                {pilotSignup.isPending ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" /> Securing Spot...
+                                    </>
+                                ) : (
+                                    <>
+                                        Claim Priority Access <ArrowRight className="h-4 w-4" />
+                                    </>
+                                )}
+                            </motion.button>
+
+                            <button
+                                onClick={() => setStep("success")}
+                                className="mt-4 text-xs text-muted-foreground hover:text-black underline transition-colors"
+                                disabled={pilotSignup.isPending}
+                            >
+                                Skip offer, complete order simulation
+                            </button>
                         </motion.div>
                     )}
 
