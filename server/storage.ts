@@ -52,6 +52,7 @@ export interface IStorage {
   getAllPilotSignups(): Promise<PilotSignup[]>;
 
   trackClickEvent(event: InsertClickEvent): Promise<ClickEvent>;
+  trackEventBatch(events: InsertClickEvent[]): Promise<void>;
   getClickStats(): Promise<{
     totalClicks: number,
     checkoutClicks: number,
@@ -194,9 +195,13 @@ export class DbStorage implements IStorage {
   }
 
   async trackClickEvent(event: InsertClickEvent): Promise<ClickEvent> {
-    const result = await db.insert(clickEvents).values(event).returning();
-    if (!result[0]) throw new Error("Failed to track event");
-    return result[0];
+    const [click] = await db.insert(clickEvents).values(event).returning();
+    return click;
+  }
+
+  async trackEventBatch(events: InsertClickEvent[]): Promise<void> {
+    if (events.length === 0) return;
+    await db.insert(clickEvents).values(events);
   }
 
   async getClickStats(): Promise<{

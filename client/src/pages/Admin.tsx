@@ -195,6 +195,69 @@ function AIInsights({ authToken }: { authToken: string | null }) {
   );
 }
 
+function PricingControl({ authToken }: { authToken: string | null }) {
+  const queryClient = useQueryClient();
+  const { data: settings } = useQuery({
+    queryKey: ["settings"],
+    queryFn: async () => {
+      const res = await fetch("/api/settings");
+      if (!res.ok) return { pricing_mode: "dynamic" };
+      return res.json();
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (mode: string) => {
+      await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ key: "pricing_mode", value: mode }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
+    },
+  });
+
+  const currentMode = settings?.pricing_mode || "dynamic";
+
+  return (
+    <Card className="h-full border-black/5 premium-shadow">
+      <CardHeader>
+        <CardTitle className="text-lg">Pricing Strategy (A/B Test)</CardTitle>
+        <p className="text-xs text-muted-foreground">Select active delivery fee model</p>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {[
+          { id: "dynamic", label: "Dynamic (Control A)", desc: "Base + Distance (Real Cost)" },
+          { id: "flat_100", label: "Flat ₹100 (Var B)", desc: "Subsidized / Profitable" },
+          { id: "flat_150", label: "Flat ₹150 (Var C)", desc: "High WTP Test" },
+        ].map((option) => (
+          <div
+            key={option.id}
+            onClick={() => mutation.mutate(option.id)}
+            className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${currentMode === option.id
+                ? "border-black bg-black text-white shadow-md"
+                : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
+              }`}
+          >
+            <div>
+              <p className="font-semibold text-sm">{option.label}</p>
+              <p className={`text-xs ${currentMode === option.id ? "text-gray-300" : "text-muted-foreground"}`}>
+                {option.desc}
+              </p>
+            </div>
+            {currentMode === option.id && <CheckCircle2 className="h-4 w-4" />}
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminDashboard() {
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);

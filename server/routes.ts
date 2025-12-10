@@ -150,6 +150,36 @@ export function registerRoutes(
     }
   });
 
+  app.post("/api/track-batch", async (req, res) => {
+    try {
+      const { events } = req.body;
+      if (!Array.isArray(events)) {
+        return res.status(400).json({ error: "Invalid format. Expected { events: [] }" });
+      }
+
+      // Basic validation/sanitization could go here
+      // For speed, strict schema validation might be skipped or done in parallel
+      // But let's map them to make sure they match the schema keys
+
+      const cleanEvents = events.map(e => ({
+        eventType: e.type, // Map 'type' from frontend to 'eventType' in DB
+        sessionId: e.sessionId,
+        metadata: e.data, // Store extra data in metadata
+        // Optional fields
+        productId: e.data?.productId,
+        storeId: e.data?.storeId,
+        offerId: e.data?.offerId,
+        searchQuery: e.data?.searchQuery
+      }));
+
+      await storage.trackEventBatch(cleanEvents);
+      res.status(200).json({ success: true });
+    } catch (error) {
+      console.error("Error tracking batch:", error);
+      res.status(500).json({ error: "Failed to track batch" });
+    }
+  });
+
   // Admin Authentication
   app.post("/api/admin/login", async (req, res) => {
     try {
@@ -310,44 +340,39 @@ export function registerRoutes(
       console.error("Error analyzing data:", error);
       res.status(500).json({ error: "Failed to generate insights" });
     }
-    const insights = generateInsights(stats, signups.length);
-    res.json({ insights });
-  } catch (error) {
-    console.error("Error analyzing data:", error);
-    res.status(500).json({ error: "Failed to generate insights" });
-  }
-});
 
-// Settings Routes
-app.get("/api/settings", async (req, res) => {
-  try {
-    const mode = await storage.getSetting("pricing_mode");
-    res.json({ pricing_mode: mode || "dynamic" });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch settings" });
-  }
-});
+  });
 
-app.post("/api/admin/settings", async (req, res) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "No token provided" });
+  // Settings Routes
+  app.get("/api/settings", async (req, res) => {
+    try {
+      const mode = await storage.getSetting("pricing_mode");
+      res.json({ pricing_mode: mode || "dynamic" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch settings" });
     }
-    const token = authHeader.substring(7);
-    if (!validateToken(token)) {
-      return res.status(401).json({ error: "Invalid or expired token" });
+  });
+
+  app.post("/api/admin/settings", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "No token provided" });
+      }
+      const token = authHeader.substring(7);
+      if (!validateToken(token)) {
+        return res.status(401).json({ error: "Invalid or expired token" });
+      }
+
+      const { key, value } = req.body;
+      if (!key || !value) return res.status(400).json({ error: "Missing key or value" });
+
+      const updated = await storage.updateSetting(key, value);
+      res.json({ success: true, value: updated });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update settings" });
     }
+  });
 
-    const { key, value } = req.body;
-    if (!key || !value) return res.status(400).json({ error: "Missing key or value" });
-
-    const updated = await storage.updateSetting(key, value);
-    res.json({ success: true, value: updated });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to update settings" });
-  }
-});
-
-return httpServer;
+  return httpServer;
 }

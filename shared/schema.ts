@@ -60,20 +60,10 @@ export const settings = pgTable("settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertProductSchema = createInsertSchema(products);
-export const insertOfferSchema = createInsertSchema(offers);
-export const insertStoreSchema = createInsertSchema(stores);
-export const insertPilotSignupSchema = createInsertSchema(pilotSignups);
 export const insertSettingSchema = createInsertSchema(settings);
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
-export type Offer = typeof offers.$inferSelect;
-export type InsertOffer = typeof offers.$inferInsert;
-export type Store = typeof stores.$inferSelect;
-export type InsertStore = typeof stores.$inferInsert;
-export type PilotSignup = typeof pilotSignups.$inferSelect;
-export type InsertPilotSignup = typeof pilotSignups.$inferInsert;
 export type Setting = typeof settings.$inferSelect;
 export type InsertSetting = typeof settings.$inferInsert;
 
@@ -120,6 +110,8 @@ export const clickEvents = pgTable("click_events", {
   offerId: integer("offer_id").references(() => offers.id),
   eventType: text("event_type").notNull(),
   searchQuery: text("search_query"),
+  sessionId: text("session_id"),
+  metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

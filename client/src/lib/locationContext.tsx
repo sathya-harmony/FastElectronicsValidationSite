@@ -11,9 +11,10 @@ interface LocationContextType {
     setUserLocation: (coords: Coordinates | null) => void;
     requestLocation: () => Promise<void>;
     calculateDistance: (lat1: number, lon1: number, lat2: number, lon2: number) => number;
-    isLocationPromptOpen: boolean;
+    locationPromptOpen: boolean; // Alias for isLocationPromptOpen for consistency
     setLocationPromptOpen: (open: boolean) => void;
-    locationError: string | null;
+    error: string | null; // Alias for locationError
+    isLoading: boolean;
 }
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
@@ -40,11 +41,14 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
     const [isLocationPromptOpen, setLocationPromptOpen] = useState(true); // Open by default on load
     const [locationError, setLocationError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
     const requestLocation = async () => {
+        setIsLoading(true);
         if (!navigator.geolocation) {
             setLocationError("Geolocation is not supported by your browser");
+            setIsLoading(false);
             return;
         }
 
@@ -57,6 +61,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
                     });
                     setLocationPromptOpen(false);
                     setLocationError(null);
+                    setIsLoading(false);
                     toast({
                         title: "Location detected",
                         description: "Delivery fees updated for your location.",
@@ -69,6 +74,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
                         errorMsg = "Location permission denied. Using default location.";
                     }
                     setLocationError(errorMsg);
+                    setIsLoading(false);
                     // Fallback to a central Bangalore location or keep null
                     // Keeping null allows us to show "Calculate Delivery" state
                 }
@@ -76,6 +82,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
         } catch (err) {
             console.error(err);
             setLocationError("An existing location request is already in progress.");
+            setIsLoading(false);
         }
     };
 
@@ -86,9 +93,10 @@ export function LocationProvider({ children }: { children: ReactNode }) {
                 setUserLocation,
                 requestLocation,
                 calculateDistance: getDistanceFromLatLonInKm,
-                isLocationPromptOpen,
+                locationPromptOpen: isLocationPromptOpen, // Aliased
                 setLocationPromptOpen,
-                locationError,
+                error: locationError, // Aliased
+                isLoading,
             }}
         >
             {children}

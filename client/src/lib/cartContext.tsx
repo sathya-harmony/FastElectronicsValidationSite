@@ -4,6 +4,7 @@ import { useLocation } from "./locationContext";
 
 interface CartItemWithDetails {
   offerId: number;
+  productId: number;
   quantity: number;
   productName: string;
   productImage: string;

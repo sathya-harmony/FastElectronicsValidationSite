@@ -4,35 +4,64 @@ import { MapPin, Navigation } from "lucide-react";
 import { useLocation } from "@/lib/locationContext";
 import { useLocation as useRouteLocation } from "wouter";
 import { motion } from "framer-motion";
+import { analytics } from "@/lib/analytics";
+import { useEffect } from "react";
 
 export function LocationPrompt() {
-    const { isLocationPromptOpen, setLocationPromptOpen, requestLocation, userLocation } = useLocation();
-    const [location] = useRouteLocation();
-    const isCartPage = location === "/cart";
+    const {
+        userLocation,
+        isLoading,
+        error,
+        requestLocation,
+        locationPromptOpen,
+        setLocationPromptOpen
+    } = useLocation();
 
-    // Don't show if we already have location
-    if (userLocation) return null;
+    const [loc_path] = useRouteLocation();
+    const isCartPage = loc_path === "/cart";
+
+    const handleAllowLocation = () => {
+        requestLocation();
+        analytics.track('click', { label: 'allow_location_btn', context: 'location_prompt' });
+    };
+
+    useEffect(() => {
+        if (userLocation) {
+            analytics.track('location_shared', {
+                lat: userLocation.lat,
+                lng: userLocation.lng
+            });
+        }
+    }, [userLocation]);
+
+    useEffect(() => {
+        if (error) {
+            analytics.track('error', {
+                code: 'location_denied',
+                message: error
+            });
+        }
+    }, [error]);
 
     return (
-        <Dialog open={isLocationPromptOpen} onOpenChange={setLocationPromptOpen}>
-            <DialogContent className="sm:max-w-md border-none shadow-2xl bg-white/95 backdrop-blur-xl">
-                <DialogHeader className="text-center items-center">
-                    <div className="h-16 w-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                        <MapPin className="h-8 w-8 text-blue-600" />
+        <Dialog open={locationPromptOpen} onOpenChange={setLocationPromptOpen}>
+            <DialogContent className="sm:max-w-md [&>button]:hidden"> {/* Hide defaults close X */}
+                <DialogHeader>
+                    <div className="mx-auto bg-primary/10 p-3 rounded-full mb-4 w-fit">
+                        <MapPin className="h-8 w-8 text-primary" />
                     </div>
-                    <DialogTitle className="text-xl font-bold">Set Delivery Location</DialogTitle>
+                    <DialogTitle className="text-center text-2xl">Enable 60-min Delivery</DialogTitle>
                     <DialogDescription className="text-center pt-2">
-                        To show you the correct delivery fees and availability, we need to know where you are in Bangalore.
+                        We need your location to show available products and accurate delivery times from nearby stores.
                     </DialogDescription>
                 </DialogHeader>
-
-                <div className="flex flex-col gap-3 py-4">
+                <div className="flex flex-col gap-3 mt-4">
                     <Button
-                        className="w-full h-12 text-lg gap-2 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 rounded-xl"
-                        onClick={requestLocation}
+                        className="w-full h-12 text-lg rounded-full shadow-lg hover:shadow-xl transition-all"
+                        onClick={handleAllowLocation}
+                        disabled={isLoading}
                     >
-                        <Navigation className="h-4 w-4" />
-                        Use Current Location
+                        {isLoading ? "Locating..." : "📍 Share Current Location"}
                     </Button>
 
                     {!isCartPage && (

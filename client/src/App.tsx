@@ -7,16 +7,16 @@ import { CartProvider } from "@/lib/cartContext";
 import { LocationProvider } from "@/lib/locationContext";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
-import SearchPage from "@/pages/Search";
-import StorePage from "@/pages/Store";
-import CartPage from "@/pages/Cart";
-import AdminDashboard from "@/pages/Admin";
-import ContactPage from "@/pages/Contact";
-import SurveyPage from "@/pages/Survey";
 import { LocationPrompt } from "@/components/modules/LocationPrompt";
-
+import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
-import { AnimatePresence, motion } from "framer-motion";
+import React, { Suspense } from "react";
+
+// Lazy load non-critical pages for better initial load performance
+const CartPage = React.lazy(() => import("@/pages/Cart"));
+const AdminDashboard = React.lazy(() => import("@/pages/Admin"));
+const ContactPage = React.lazy(() => import("@/pages/Contact"));
+const SurveyPage = React.lazy(() => import("@/pages/Survey"));
 
 function Router() {
   const [location] = useLocation();
@@ -25,23 +25,28 @@ function Router() {
     <AnimatePresence mode="wait">
       <motion.div
         key={location}
-        initial={{ opacity: 0, y: 10, scale: 0.99 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -10, scale: 0.99 }}
-        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }} // Apple-style easing
-        className="w-full min-h-screen"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.2 }}
+        className="flex-1 flex flex-col min-h-screen"
       >
-        <Switch location={location}>
-          <Route path="/" component={Home} />
-          <Route path="/search" component={SearchPage} />
-          <Route path="/store/:id" component={StorePage} />
-          <Route path="/stores" component={Home} />
-          <Route path="/cart" component={CartPage} />
-          <Route path="/admin" component={AdminDashboard} />
-          <Route path="/contact" component={ContactPage} />
-          <Route path="/survey" component={SurveyPage} />
-          <Route component={NotFound} />
-        </Switch>
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center min-h-screen">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          }
+        >
+          <Switch location={location}>
+            <Route path="/" component={Home} />
+            <Route path="/cart" component={CartPage} />
+            <Route path="/admin" component={AdminDashboard} />
+            <Route path="/contact" component={ContactPage} />
+            <Route path="/survey" component={SurveyPage} />
+            <Route component={NotFound} />
+          </Switch>
+        </Suspense>
       </motion.div>
     </AnimatePresence>
   );

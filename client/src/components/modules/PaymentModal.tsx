@@ -36,6 +36,8 @@ const PAYMENT_METHODS = [
     },
 ];
 
+import { analytics } from "@/lib/analytics";
+
 export function PaymentModal({ isOpen, onClose, totalAmount }: PaymentModalProps) {
     const { clearCart } = useCart();
     const [step, setStep] = useState<"select" | "processing" | "signup" | "success">("select");
@@ -54,6 +56,7 @@ export function PaymentModal({ isOpen, onClose, totalAmount }: PaymentModalProps
             return res.json();
         },
         onSuccess: () => {
+            analytics.track('pilot_signup', { email: email }); // Track signup
             setStep("success");
             clearCart();
         },
@@ -62,19 +65,8 @@ export function PaymentModal({ isOpen, onClose, totalAmount }: PaymentModalProps
     const handlePaymentSelect = async (methodId: string) => {
         setSelectedMethod(methodId);
 
-        // Track event
-        try {
-            await fetch("/api/track-event", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    eventType: "payment_option_selected",
-                    searchQuery: methodId
-                }),
-            });
-        } catch (e) {
-            console.error("Tracking failed", e);
-        }
+        // Track event via engine
+        analytics.track('payment_option_selected', { methodId, totalAmount });
 
         setStep("processing");
 

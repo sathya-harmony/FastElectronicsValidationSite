@@ -1,80 +1,98 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cartContext";
-import { useLocation } from "@/lib/locationContext";
-import { Card } from "@/components/ui/card";
-import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Store, MapPin, Truck } from "lucide-react";
 import { Link } from "wouter";
-import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PRICING_CONFIG } from "@shared/pricingConfig";
+import { LocationPrompt } from "@/components/modules/LocationPrompt";
+import { useLocation } from "@/lib/locationContext";
+import { useState } from "react";
 import { PaymentModal } from "@/components/modules/PaymentModal";
+import { useToast } from "@/hooks/use-toast";
+import { analytics } from "@/lib/analytics";
 
-const appleEasing: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
-
-const staggerContainer = {
+const container = {
   hidden: { opacity: 0 },
-  visible: {
+  show: {
     opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-  },
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
 };
 
-const fadeInUp = {
+const item = {
   hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: appleEasing }
-  },
+  show: { opacity: 1, y: 0 }
 };
 
 export default function CartPage() {
-  const { items, updateQuantity, removeFromCart, getSubtotal, getDeliveryBreakdown, getTotal, clearCart } = useCart();
+  const { items, removeFromCart, updateQuantity, clearCart, getTotal, getDeliveryBreakdown, getSubtotal } = useCart();
   const { userLocation, setLocationPromptOpen } = useLocation();
-  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const { toast } = useToast();
+
+  // New Payment Modal State
+  const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
 
   const deliveryBreakdown = getDeliveryBreakdown();
 
-  const groupedByStore = items.reduce((acc, item) => {
+  // Group items by store for display
+  const itemsByStore = items.reduce((acc, item) => {
     if (!acc[item.storeId]) {
-      acc[item.storeId] = { storeName: item.storeName, items: [] };
+      acc[item.storeId] = {
+        storeName: item.storeName,
+        items: []
+      };
     }
     acc[item.storeId].items.push(item);
     return acc;
   }, {} as Record<number, { storeName: string; items: typeof items }>);
 
+  const handleCheckout = () => {
+    if (items.length === 0) {
+      toast({
+        title: "Cart is empty",
+        description: "Add some items before checking out",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // MANDATORY LOCATION CHECK
+    if (!userLocation) {
+      setLocationPromptOpen(true);
+      return;
+    }
+
+    analytics.track('checkout_init', {
+      cartTotal: getTotal(),
+      itemCount: items.length,
+      items: items.map(i => ({ id: i.productId, name: i.productName }))
+    });
+
+    setPaymentModalOpen(true);
+  };
+
   if (items.length === 0) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <main className="flex-1 flex items-center justify-center pt-16">
+        <main className="flex-1 flex flex-col items-center justify-center p-4">
           <motion.div
-            className="text-center py-20"
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.6, ease: appleEasing }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="text-center"
           >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-            >
-              <ShoppingBag className="h-20 w-20 mx-auto text-muted-foreground/40 mb-6" />
-            </motion.div>
-            <h2 className="text-2xl font-bold mb-3">Your cart is empty</h2>
-            <p className="text-muted-foreground mb-8">
-              Add some products to get started
-            </p>
+            <div className="h-24 w-24 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
+              <ShoppingBag className="h-10 w-10 text-muted-foreground" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
+            <p className="text-muted-foreground mb-8">Looks like you haven't added anything yet.</p>
             <Link href="/">
-              <motion.span
-                className="inline-flex items-center justify-center px-8 h-12 text-base font-medium bg-black text-white rounded-full shadow-lg cursor-pointer"
-                whileHover={{ scale: 1.05, boxShadow: "0 20px 40px -10px rgba(0,0,0,0.3)" }}
-                whileTap={{ scale: 0.98 }}
-                data-testid="button-continue-shopping"
-              >
-                Continue Shopping
-              </motion.span>
+              <Button className="h-12 px-8 rounded-full text-lg">
+                Start Shopping
+              </Button>
             </Link>
           </motion.div>
         </main>
@@ -86,187 +104,154 @@ export default function CartPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 pt-24 pb-12">
-        <div className="max-w-5xl mx-auto px-6">
-          <motion.h1
-            className="text-3xl font-bold tracking-tight mb-10"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: appleEasing }}
-          >
-            Shopping Cart
-          </motion.h1>
 
-          <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
-            <motion.div
-              className="space-y-6"
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-            >
-              {Object.entries(groupedByStore).map(([storeId, { storeName, items: storeItems }]) => (
-                <motion.div key={storeId} variants={fadeInUp}>
-                  <Card
-                    className="p-6 rounded-3xl bg-white/80 backdrop-blur-sm border-black/5 premium-shadow"
-                    data-testid={`cart-store-${storeId}`}
-                  >
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="font-bold text-lg">{storeName}</h3>
-                      <span className="text-sm text-muted-foreground px-3 py-1 bg-secondary rounded-full">
-                        Delivery: ₹{deliveryBreakdown.storeDeliveryFees.find(f => f.storeId === Number(storeId))?.fee || 0}
-                      </span>
-                    </div>
-                    <div className="space-y-5">
-                      <AnimatePresence>
-                        {storeItems.map((item) => (
-                          <motion.div
-                            key={item.offerId}
-                            className="flex gap-5 items-center"
-                            data-testid={`cart-item-${item.offerId}`}
-                            layout
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20, height: 0 }}
-                            transition={{ duration: 0.3, ease: appleEasing }}
-                          >
-                            <motion.div
-                              className="w-24 h-24 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden flex-shrink-0"
-                              whileHover={{ scale: 1.05 }}
-                            >
+      <main className="flex-1 pt-24 pb-12">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex items-center gap-2 mb-8">
+            <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
+              Home
+            </Link>
+            <span className="text-muted-foreground">/</span>
+            <span className="font-semibold">Cart</span>
+          </div>
+
+          <h1 className="text-3xl font-bold mb-8">Shopping Cart ({items.length} items)</h1>
+
+          <div className="lg:grid lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-8">
+              <motion.div
+                variants={container}
+                initial="hidden"
+                animate="show"
+                className="space-y-6"
+              >
+                {Object.entries(itemsByStore).map(([storeId, storeGroup]) => {
+                  const storeFee = deliveryBreakdown.storeDeliveryFees.find(f => f.storeId === Number(storeId))?.fee || 0;
+
+                  return (
+                    <motion.div key={storeId} variants={item} className="bg-white rounded-2xl p-6 border border-black/5 shadow-sm">
+                      <div className="flex items-center gap-2 mb-4 pb-4 border-b border-black/5">
+                        <Store className="h-5 w-5 text-gray-500" />
+                        <h3 className="font-semibold text-lg">{storeGroup.storeName}</h3>
+                        <div className="ml-auto flex items-center gap-1 text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+                          <Truck className="h-3 w-3" />
+                          <span>Delivery: ₹{storeFee}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-6">
+                        {storeGroup.items.map((item) => (
+                          <div key={item.offerId} className="flex gap-4">
+                            <div className="h-24 w-24 rounded-xl bg-gray-50 overflow-hidden flex-shrink-0 border border-black/5">
                               <img
                                 src={item.productImage}
                                 alt={item.productName}
-                                className="w-full h-full object-cover"
+                                className="h-full w-full object-contain p-2"
                               />
-                            </motion.div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-sm line-clamp-2 mb-1">
-                                {item.productName}
-                              </h4>
-                              <p className="text-base font-bold">
-                                ₹{item.price.toLocaleString()}
-                              </p>
                             </div>
-                            <div className="flex items-center gap-3">
-                              <motion.button
-                                className="h-9 w-9 rounded-full border border-black/10 flex items-center justify-center hover:bg-black/5 transition-colors"
-                                onClick={() => updateQuantity(item.offerId, item.quantity - 1)}
-                                data-testid={`button-decrease-${item.offerId}`}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                              >
-                                <Minus className="h-3.5 w-3.5" />
-                              </motion.button>
-                              <span className="w-8 text-center font-semibold">
-                                {item.quantity}
-                              </span>
-                              <motion.button
-                                className="h-9 w-9 rounded-full border border-black/10 flex items-center justify-center hover:bg-black/5 transition-colors"
-                                onClick={() => updateQuantity(item.offerId, item.quantity + 1)}
-                                data-testid={`button-increase-${item.offerId}`}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                              >
-                                <Plus className="h-3.5 w-3.5" />
-                              </motion.button>
-                              <motion.button
-                                className="h-9 w-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
-                                onClick={() => removeFromCart(item.offerId)}
-                                data-testid={`button-remove-${item.offerId}`}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </motion.button>
+
+                            <div className="flex-1 flex flex-col justify-between">
+                              <div className="flex justify-between items-start gap-4">
+                                <div>
+                                  <h4 className="font-medium line-clamp-2">{item.productName}</h4>
+                                  <p className="text-sm text-muted-foreground mt-1">₹{Number(item.price).toLocaleString()}</p>
+                                </div>
+                                <button
+                                  onClick={() => removeFromCart(item.offerId)}
+                                  className="text-muted-foreground hover:text-red-500 transition-colors p-1"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+
+                              <div className="flex items-center gap-3">
+                                <div className="flex items-center rounded-lg border border-black/10">
+                                  <button
+                                    onClick={() => updateQuantity(item.offerId, item.quantity - 1)}
+                                    className="p-2 hover:bg-black/5 transition-colors"
+                                  >
+                                    <Minus className="h-3 w-3" />
+                                  </button>
+                                  <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                                  <button
+                                    onClick={() => updateQuantity(item.offerId, item.quantity + 1)}
+                                    className="p-2 hover:bg-black/5 transition-colors"
+                                  >
+                                    <Plus className="h-3 w-3" />
+                                  </button>
+                                </div>
+                                <div className="ml-auto font-semibold">
+                                  ₹{(Number(item.price) * item.quantity).toLocaleString()}
+                                </div>
+                              </div>
                             </div>
-                          </motion.div>
+                          </div>
                         ))}
-                      </AnimatePresence>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </motion.div>
+            </div>
+
+            <div className="lg:col-span-4 mt-8 lg:mt-0">
+              <div className="bg-white rounded-2xl p-6 border border-black/5 shadow-sm sticky top-24 relative">
+                {/* Summary content */}
+                <h3 className="font-semibold text-xl mb-6">Order Summary</h3>
+
+                <div className="space-y-3 mb-6">
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Subtotal</span>
+                    <span>₹{getSubtotal().toLocaleString()}</span>
+                  </div>
+
+                  {deliveryBreakdown.storeDeliveryFees.map((fee) => (
+                    <div key={fee.storeId} className="flex justify-between text-sm">
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <MapPin className="h-3 w-3" /> {fee.storeName}
+                      </span>
+                      <span>₹{fee.fee}</span>
                     </div>
-                  </Card>
-                </motion.div>
-              ))}
-            </motion.div>
+                  ))}
 
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2, ease: appleEasing }}
-            >
-              <Card className="p-6 rounded-3xl bg-white/80 backdrop-blur-sm border-black/5 premium-shadow sticky top-24">
-                <h3 className="font-bold text-lg mb-6">Order Summary</h3>
-                <div className="space-y-4 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium">₹{getSubtotal().toLocaleString()}</span>
-                  </div>
+                  <div className="border-t border-dashed my-3"></div>
 
-                  <div className="border-t border-black/5 pt-4 space-y-2">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Delivery Charges</span>
-                    {deliveryBreakdown.storeDeliveryFees.map((store) => (
-                      <div key={store.storeId} className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">{store.storeName}</span>
-                        <span>₹{store.fee}</span>
-                      </div>
-                    ))}
-                    {deliveryBreakdown.transitFee > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Multi-store transit</span>
-                        <span>₹{deliveryBreakdown.transitFee}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex justify-between pt-2">
-                    <span className="text-muted-foreground">Total Delivery</span>
-                    <span className="font-medium">₹{deliveryBreakdown.totalDelivery}</span>
-                  </div>
-
-                  <div className="border-t border-black/5 pt-4 flex justify-between font-bold text-lg">
+                  <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
                     <span>₹{getTotal().toLocaleString()}</span>
                   </div>
                 </div>
-                <motion.button
-                  className="w-full mt-8 rounded-full h-14 text-base font-semibold bg-black text-white shadow-lg shadow-black/20"
-                  onClick={() => {
-                    if (!userLocation) {
-                      setLocationPromptOpen(true);
-                      return;
-                    }
 
-                    fetch("/api/track-event", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ eventType: "checkout" }),
-                    }).catch(() => { });
-                    setShowCheckoutModal(true);
-                  }}
-                  data-testid="button-checkout"
-                  whileHover={{ scale: 1.02, boxShadow: "0 25px 50px -12px rgba(0,0,0,0.3)" }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Proceed to Checkout
-                </motion.button>
-                <Link href="/">
-                  <motion.span
-                    className="block w-full mt-3 text-center text-muted-foreground hover:text-foreground py-3 rounded-full cursor-pointer transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    data-testid="button-back-shopping"
+                <div className="space-y-3">
+                  {!userLocation && (
+                    <div className="p-3 bg-blue-50 text-blue-700 text-sm rounded-xl mb-2 flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Location needed for final pricing
+                    </div>
+                  )}
+
+                  <Button
+                    className="w-full h-14 text-lg rounded-xl gap-2 font-bold bg-black hover:bg-black/90"
+                    onClick={handleCheckout}
                   >
-                    Continue Shopping
-                  </motion.span>
-                </Link>
-              </Card>
-            </motion.div>
+                    Proceed to Checkout <ArrowRight className="h-5 w-5" />
+                  </Button>
+
+                  <p className="text-xs text-center text-muted-foreground mt-4">
+                    Secure checkout powered by ThunderFast
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
-      <Footer />
 
+      <Footer />
+      <LocationPrompt />
       <PaymentModal
-        isOpen={showCheckoutModal}
-        onClose={() => setShowCheckoutModal(false)}
+        isOpen={isPaymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
         totalAmount={getTotal()}
       />
     </div>
