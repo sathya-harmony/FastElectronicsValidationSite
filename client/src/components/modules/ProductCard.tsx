@@ -73,6 +73,19 @@ export function ProductCard({ product, offer, storeName, store }: ProductCardPro
 
 
   return (
+    // Dynamic ETA Calculation
+    let dynamicEta = offer.eta;
+
+  if (userLocation && store?.lat && store?.lng) {
+    const dist = calculateDistance(userLocation.lat, userLocation.lng, Number(store.lat), Number(store.lng));
+    // Base 30 mins + 7 mins per km (Bangalore traffic)
+    dynamicEta = Math.round(30 + (dist * 7));
+  } else if (store?.distanceKm) {
+    const dist = Number(store.distanceKm);
+    dynamicEta = Math.round(30 + (dist * 7));
+  }
+
+  return (
     <>
       <motion.div
         className="group bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden border border-black/5 premium-shadow cursor-pointer"
@@ -115,7 +128,7 @@ export function ProductCard({ product, offer, storeName, store }: ProductCardPro
           </div>
 
           <p className="text-xs text-muted-foreground">
-            {store?.name || "Store"} · {offer.eta} min delivery
+            {store?.name || "Store"} · {dynamicEta} min delivery
           </p>
 
           <motion.button
