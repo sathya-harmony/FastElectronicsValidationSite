@@ -46,14 +46,18 @@ export function ProductCard({ product, offer, storeName, store }: ProductCardPro
 
   // Dynamic Delivery Calculation
   let dynamicDeliveryFee = offer.displayedDeliveryFee;
+  let dynamicEta = offer.eta;
 
   if (userLocation && store?.lat && store?.lng) {
     const dist = calculateDistance(userLocation.lat, userLocation.lng, Number(store.lat), Number(store.lng));
     dynamicDeliveryFee = Math.round(PRICING_CONFIG.deliveryBaseFee + (PRICING_CONFIG.deliveryPerKmFee * dist));
+    // Base 30 mins + 7 mins per km (Bangalore traffic)
+    dynamicEta = Math.round(30 + (dist * 7));
   } else if (store?.distanceKm) {
     // Fallback
     const dist = Number(store.distanceKm);
     dynamicDeliveryFee = Math.round(PRICING_CONFIG.deliveryBaseFee + (PRICING_CONFIG.deliveryPerKmFee * dist));
+    dynamicEta = Math.round(30 + (dist * 7));
   }
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -66,24 +70,12 @@ export function ProductCard({ product, offer, storeName, store }: ProductCardPro
       price: offer.price,
       storeName: store?.name || storeName || "Store",
       storeId: Number(offer.storeId),
+      productId: Number(product.id), // Added productId
     });
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1500);
   };
 
-
-  return (
-    // Dynamic ETA Calculation
-    let dynamicEta = offer.eta;
-
-  if (userLocation && store?.lat && store?.lng) {
-    const dist = calculateDistance(userLocation.lat, userLocation.lng, Number(store.lat), Number(store.lng));
-    // Base 30 mins + 7 mins per km (Bangalore traffic)
-    dynamicEta = Math.round(30 + (dist * 7));
-  } else if (store?.distanceKm) {
-    const dist = Number(store.distanceKm);
-    dynamicEta = Math.round(30 + (dist * 7));
-  }
 
   return (
     <>
