@@ -2,7 +2,7 @@
 import { storage } from "../server/storage";
 import { products } from "../shared/schema";
 
-const PRODUCT_DATA: Record<string, { desc: string; specs: string[] }> = {
+export const PRODUCT_DATA: Record<string, { desc: string; specs: string[] }> = {
     "Arduino UNO R3": {
         desc: "The Arduino Uno R3 is a microcontroller board based on the ATmega328P. It has 14 digital input/output pins (of which 6 can be used as PWM outputs), 6 analog inputs, a 16 MHz ceramic resonator, a USB connection, a power jack, an ICSP header, and a reset button. It contains everything needed to support the microcontroller; simply connect it to a computer with a USB cable or power it with an AC-to-DC adapter or battery to get started.",
         specs: ["Microcontroller: ATmega328P", "Operating Voltage: 5V", "Input Voltage (recommended): 7-12V", "Digital I/O Pins: 14 (6 PWM)", "Analog Input Pins: 6", "Flash Memory: 32 KB", "Clock Speed: 16 MHz"]
@@ -229,4 +229,4 @@ async function main() {
     console.log(`Done! Updated ${updatedCount} products.`);
 }
 
-main().catch(console.error);
+// main().catch(console.error);

@@ -12,6 +12,7 @@ import StorePage from "@/pages/Store";
 import CartPage from "@/pages/Cart";
 import AdminDashboard from "@/pages/Admin";
 import ContactPage from "@/pages/Contact";
+import { LocationPrompt } from "@/components/modules/LocationPrompt";
 
 import { useLocation } from "wouter";
 import { AnimatePresence, motion } from "framer-motion";
@@ -57,6 +58,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <LocationProvider>
+        <LocationPrompt />
         <CartProvider>
           <TooltipProvider>
             <Toaster />

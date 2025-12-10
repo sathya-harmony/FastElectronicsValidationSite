@@ -112,11 +112,6 @@ export function ProductCard({ product, offer, storeName, store }: ProductCardPro
 
           <div className="flex items-baseline gap-2">
             <span className="font-bold text-xl tracking-tight">₹{offer.price.toLocaleString()}</span>
-            {dynamicDeliveryFee > 0 && (
-              <span className="text-xs text-muted-foreground">
-                +₹{dynamicDeliveryFee} delivery
-              </span>
-            )}
           </div>
 
           <p className="text-xs text-muted-foreground">

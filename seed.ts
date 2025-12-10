@@ -3,6 +3,7 @@ import { type InsertStore, type InsertProduct, type InsertOffer } from "./shared
 
 import { IMAGES } from "./shared/images";
 import { PRICING_CONFIG } from "./shared/pricingConfig";
+import { PRODUCT_DATA } from "./script/enrich_products_ai";
 
 const ITEMS = [
     ["Arduino UNO R3", "Microcontroller Board", "500-1750", "The classic Arduino board for beginners and pros."],
@@ -117,14 +118,16 @@ async function main() {
     for (const item of ITEMS) {
         const [name, category, priceRange, desc] = item;
         const image = IMAGES[name] || "https://images.unsplash.com/photo-1555664424-778a690ea370?w=800&q=80"; // Fallback
+        const aiData = PRODUCT_DATA[name];
 
         const product = await storage.createProduct({
             name,
             sku: name.replace(/\s+/g, '-').toUpperCase().slice(0, 15),
             category,
             shortDesc: desc,
+            longDescription: aiData?.desc || desc,
             image,
-            specs: ["Standard Specs", "High Quality"],
+            specs: aiData?.specs || ["Standard Specs", "High Quality"],
             suitability: "Makers & Engineers",
             datasheetUrl: "#"
         });

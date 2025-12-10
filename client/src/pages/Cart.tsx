@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { useCart } from "@/lib/cartContext";
+import { useLocation } from "@/lib/locationContext";
 import { Card } from "@/components/ui/card";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { Link } from "wouter";
@@ -30,6 +31,7 @@ const fadeInUp = {
 
 export default function CartPage() {
   const { items, updateQuantity, removeFromCart, getSubtotal, getDeliveryBreakdown, getTotal, clearCart } = useCart();
+  const { userLocation, setLocationPromptOpen } = useLocation();
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
   const deliveryBreakdown = getDeliveryBreakdown();
@@ -228,6 +230,11 @@ export default function CartPage() {
                 <motion.button
                   className="w-full mt-8 rounded-full h-14 text-base font-semibold bg-black text-white shadow-lg shadow-black/20"
                   onClick={() => {
+                    if (!userLocation) {
+                      setLocationPromptOpen(true);
+                      return;
+                    }
+
                     fetch("/api/track-event", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },

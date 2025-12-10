@@ -2,10 +2,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { MapPin, Navigation } from "lucide-react";
 import { useLocation } from "@/lib/locationContext";
+import { useLocation as useRouteLocation } from "wouter";
 import { motion } from "framer-motion";
 
 export function LocationPrompt() {
     const { isLocationPromptOpen, setLocationPromptOpen, requestLocation, userLocation } = useLocation();
+    const [location] = useRouteLocation();
+    const isCartPage = location === "/cart";
 
     // Don't show if we already have location
     if (userLocation) return null;
@@ -32,17 +35,19 @@ export function LocationPrompt() {
                         Use Current Location
                     </Button>
 
-                    <Button
-                        variant="ghost"
-                        className="text-muted-foreground"
-                        onClick={() => setLocationPromptOpen(false)}
-                    >
-                        Enter manually later
-                    </Button>
+                    {!isCartPage && (
+                        <Button
+                            variant="ghost"
+                            className="text-muted-foreground"
+                            onClick={() => setLocationPromptOpen(false)}
+                        >
+                            Enter manually later
+                        </Button>
+                    )}
                 </div>
 
                 <div className="bg-blue-50/50 p-3 rounded-lg text-xs text-center text-blue-800">
-
+                    📍 Optimization: 17km delivery ≈ ₹305 (Linear Calculation)
                 </div>
             </DialogContent>
         </Dialog>

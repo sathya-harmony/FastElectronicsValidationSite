@@ -2,7 +2,6 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/modules/Hero";
 import { ProductCard } from "@/components/modules/ProductCard";
-import { LocationPrompt } from "@/components/modules/LocationPrompt";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
@@ -107,7 +106,6 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1">
-        <LocationPrompt />
         <Hero />
 
         <motion.section
