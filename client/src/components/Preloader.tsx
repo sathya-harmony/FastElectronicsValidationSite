@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { IMAGES } from "@shared/images";
+import { queryClient } from "@/lib/queryClient";
 
 interface PreloaderProps {
     onComplete: () => void;
@@ -8,49 +9,65 @@ interface PreloaderProps {
 
 export default function Preloader({ onComplete }: PreloaderProps) {
     const [progress, setProgress] = useState(0);
-    const [loadedCount, setLoadedCount] = useState(0);
 
     useEffect(() => {
         const imageUrls = Object.values(IMAGES);
-        const total = imageUrls.length;
+        const totalImages = imageUrls.length;
+        const apiEndpoints = ["/api/products", "/api/stores", "/api/offers"];
+        const totalItems = totalImages + apiEndpoints.length;
 
-        // Safety check: if no images, complete immediately
-        if (total === 0) {
-            setProgress(100);
-            setTimeout(onComplete, 500);
-            return;
-        }
+        let completedCount = 0;
 
-        const loadImages = async () => {
-            const promises = imageUrls.map((src) => {
+        const updateProgress = () => {
+            completedCount++;
+            setProgress(Math.round((completedCount / totalItems) * 100));
+        };
+
+        const loadData = async () => {
+            // 1. Prefetch API Data (Warms up Vercel Lambdas)
+            const apiPromises = apiEndpoints.map(async (endpoint) => {
+                const queryKey = [endpoint.replace("/api/", "")]; // e.g. ["products"]
+                try {
+                    await queryClient.prefetchQuery({
+                        queryKey,
+                        queryFn: async () => {
+                            const res = await fetch(endpoint);
+                            if (!res.ok) throw new Error("Failed");
+                            return res.json();
+                        }
+                    });
+                } catch (e) {
+                    console.error(`Failed to prefetch ${endpoint}`, e);
+                } finally {
+                    updateProgress();
+                }
+            });
+
+            // 2. Prefetch Images
+            const imagePromises = imageUrls.map((src) => {
                 return new Promise<void>((resolve) => {
                     const img = new Image();
                     img.src = src;
-                    // Whether success or error, we count it as "processed" to not block the UI
-                    img.onload = () => resolve();
-                    img.onerror = () => resolve();
+                    img.onload = () => {
+                        updateProgress();
+                        resolve();
+                    };
+                    img.onerror = () => {
+                        updateProgress(); // Count as done even if failed to avoid hanging
+                        resolve();
+                    };
                 });
             });
 
-            // Update progress as each promise resolves
-            promises.forEach((p) => {
-                p.then(() => {
-                    setLoadedCount((prev) => {
-                        const newCount = prev + 1;
-                        setProgress(Math.round((newCount / total) * 100));
-                        return newCount;
-                    });
-                });
-            });
+            // Wait for everything
+            await Promise.all([...apiPromises, ...imagePromises]);
 
-            await Promise.all(promises);
-
-            // Ensure we hit 100% and wait a tiny bit for the animation to finish
+            // Finish
             setProgress(100);
             setTimeout(onComplete, 800);
         };
 
-        loadImages();
+        loadData();
     }, [onComplete]);
 
     return (
@@ -62,7 +79,6 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                 className="w-full max-w-sm px-8"
             >
                 <div className="mb-8 flex justify-center">
-                    {/* Logo or Icon could go here */}
                     <div className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent dark:from-gray-100 dark:to-gray-400">
                         Pilot Store
                     </div>
@@ -78,7 +94,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                 </div>
 
                 <div className="mt-4 flex justify-between text-xs font-medium text-muted-foreground font-mono">
-                    <span>Loading assets...</span>
+                    <span>Initializing store...</span>
                     <span>{progress}%</span>
                 </div>
             </motion.div>
