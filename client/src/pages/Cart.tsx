@@ -7,7 +7,7 @@ import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { LocationPrompt } from "@/components/modules/LocationPrompt";
 import { useLocation } from "@/lib/locationContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PaymentModal } from "@/components/modules/PaymentModal";
 import { useToast } from "@/hooks/use-toast";
 import { analytics } from "@/lib/analytics";
@@ -36,6 +36,10 @@ export default function CartPage() {
   const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
 
   const deliveryBreakdown = getDeliveryBreakdown();
+
+  useEffect(() => {
+    document.title = "Your Cart | Rapid Electronics";
+  }, []);
 
   // Group items by store for display
   const itemsByStore = items.reduce((acc, item) => {

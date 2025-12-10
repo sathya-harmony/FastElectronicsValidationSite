@@ -262,6 +262,11 @@ function PricingControl({ authToken }: { authToken: string | null }) {
 }
 
 export default function AdminDashboard() {
+  const [timeRange, setTimeRange] = useState<string>("7d");
+
+  useEffect(() => {
+    document.title = "Admin Dashboard | Rapid Electronics";
+  }, []);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 

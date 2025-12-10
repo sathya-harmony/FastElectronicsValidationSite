@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { Clock, Star, MapPin, ArrowRight } from "lucide-react";
+import { useEffect } from "react";
 
 const appleEasing: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
 
@@ -67,6 +68,10 @@ interface Offer {
 }
 
 export default function Home() {
+  useEffect(() => {
+    document.title = "Rapid Electronics | Prototyping & Components";
+  }, []);
+
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["products"],
     queryFn: async () => {

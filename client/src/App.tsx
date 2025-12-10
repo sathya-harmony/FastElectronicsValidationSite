@@ -23,6 +23,11 @@ const SearchResults = React.lazy(() => import("@/pages/SearchResults"));
 function Router() {
   const [location] = useLocation();
 
+  // Scroll to top on route change
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+
   return (
     <AnimatePresence mode="wait">
       <motion.div

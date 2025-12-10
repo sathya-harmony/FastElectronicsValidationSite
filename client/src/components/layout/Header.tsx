@@ -36,7 +36,7 @@ export function Header() {
             whileHover={{ opacity: 0.7 }}
             transition={{ duration: 0.2 }}
           >
-            ThunderFast
+            Rapid Electronics
           </motion.span>
         </Link>
 
@@ -142,7 +142,7 @@ export function Header() {
               <form onSubmit={handleSearch} className="flex gap-3">
                 <motion.input
                   type="search"
-                  placeholder="Search products, categories..."
+                  placeholder="Search components, sensors, modules..."
                   className="flex-1 px-5 py-3.5 text-sm bg-white/60 border border-black/5 rounded-full focus:outline-none focus:ring-2 focus:ring-black/10 transition-all duration-300"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}

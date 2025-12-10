@@ -35,19 +35,19 @@ const buttonVariants = {
 export function Hero() {
   return (
     <section className="relative w-full min-h-[600px] lg:min-h-[700px] overflow-hidden">
-      <motion.img 
+      <motion.img
         src={robert}
-        alt="Robot holding electronics" 
+        alt="Robot holding electronics"
         className="absolute inset-0 w-full h-full object-cover object-center"
         initial={{ scale: 1.1, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 1.5, ease: appleEasing }}
       />
-      
+
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
-      
+
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 h-full min-h-[600px] lg:min-h-[700px] flex flex-col justify-center">
-        <motion.div 
+        <motion.div
           className="max-w-xl space-y-8"
           initial="hidden"
           animate="visible"
@@ -63,7 +63,7 @@ export function Hero() {
             <motion.span className="block" custom={2} variants={textReveal}>
               CONQUER.
             </motion.span>
-            <motion.span 
+            <motion.span
               className="block mt-4 text-white/90 font-semibold text-3xl sm:text-4xl lg:text-5xl"
               custom={3}
               variants={textReveal}
@@ -71,22 +71,22 @@ export function Hero() {
               30 Minutes.
             </motion.span>
           </h1>
-          
-          <motion.p 
+
+          <motion.p
             className="text-lg text-white/70 max-w-md leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.7, ease: appleEasing }}
           >
-            Premium electronics delivered to your doorstep in Bangalore. Skip the traffic, get what you need.
+            Essential robotics components and prototyping gear delivered in 30 minutes. Build your ideas faster.
           </motion.p>
-          
+
           <motion.div variants={buttonVariants}>
             <Link href="/search?q=">
               <motion.span
                 className="inline-flex items-center justify-center px-8 py-4 text-sm font-medium bg-white text-black rounded-full shadow-lg shadow-white/20 cursor-pointer"
-                whileHover={{ 
-                  scale: 1.05, 
+                whileHover={{
+                  scale: 1.05,
                   boxShadow: "0 25px 50px -12px rgba(255, 255, 255, 0.3)",
                 }}
                 whileTap={{ scale: 0.98 }}
