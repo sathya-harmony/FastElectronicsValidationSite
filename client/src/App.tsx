@@ -17,7 +17,7 @@ const CartPage = React.lazy(() => import("@/pages/Cart"));
 const AdminDashboard = React.lazy(() => import("@/pages/Admin"));
 const ContactPage = React.lazy(() => import("@/pages/Contact"));
 const SurveyPage = React.lazy(() => import("@/pages/Survey"));
-const StoreDetails = React.lazy(() => import("@/pages/StoreDetails"));
+const StorePage = React.lazy(() => import("@/pages/Store"));
 
 function Router() {
   const [location] = useLocation();
@@ -45,7 +45,7 @@ function Router() {
             <Route path="/admin" component={AdminDashboard} />
             <Route path="/contact" component={ContactPage} />
             <Route path="/survey" component={SurveyPage} />
-            <Route path="/store/:id" component={StoreDetails} />
+            <Route path="/store/:id" component={StorePage} />
             <Route component={NotFound} />
           </Switch>
         </Suspense>
