@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as https from 'https';
 
 // The IMAGES map from seed.ts (Copy-pasted for standalone execution)
-import { IMAGES } from "./images";
+import { IMAGES } from "./shared/images";
 
 const TARGET_DIR = path.join(process.cwd(), 'client', 'public', 'products');
 
