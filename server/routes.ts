@@ -310,7 +310,44 @@ export function registerRoutes(
       console.error("Error analyzing data:", error);
       res.status(500).json({ error: "Failed to generate insights" });
     }
-  });
+    const insights = generateInsights(stats, signups.length);
+    res.json({ insights });
+  } catch (error) {
+    console.error("Error analyzing data:", error);
+    res.status(500).json({ error: "Failed to generate insights" });
+  }
+});
 
-  return httpServer;
+// Settings Routes
+app.get("/api/settings", async (req, res) => {
+  try {
+    const mode = await storage.getSetting("pricing_mode");
+    res.json({ pricing_mode: mode || "dynamic" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch settings" });
+  }
+});
+
+app.post("/api/admin/settings", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+    const token = authHeader.substring(7);
+    if (!validateToken(token)) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+
+    const { key, value } = req.body;
+    if (!key || !value) return res.status(400).json({ error: "Missing key or value" });
+
+    const updated = await storage.updateSetting(key, value);
+    res.json({ success: true, value: updated });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update settings" });
+  }
+});
+
+return httpServer;
 }

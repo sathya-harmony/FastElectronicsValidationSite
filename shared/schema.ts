@@ -50,15 +50,32 @@ export const products = pgTable("products", {
   datasheetUrl: text("datasheet_url"),
   suitability: text("suitability"),
   longDescription: text("long_description"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertProductSchema = createInsertSchema(products).omit({
-  id: true,
-  createdAt: true,
+export const settings = pgTable("settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(), // e.g., 'pricing_mode'
+  value: text("value").notNull(),     // e.g., 'flat_100'
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
-export type InsertProduct = z.infer<typeof insertProductSchema>;
+
+export const insertProductSchema = createInsertSchema(products);
+export const insertOfferSchema = createInsertSchema(offers);
+export const insertStoreSchema = createInsertSchema(stores);
+export const insertPilotSignupSchema = createInsertSchema(pilotSignups);
+export const insertSettingSchema = createInsertSchema(settings);
+
 export type Product = typeof products.$inferSelect;
+export type InsertProduct = typeof products.$inferInsert;
+export type Offer = typeof offers.$inferSelect;
+export type InsertOffer = typeof offers.$inferInsert;
+export type Store = typeof stores.$inferSelect;
+export type InsertStore = typeof stores.$inferInsert;
+export type PilotSignup = typeof pilotSignups.$inferSelect;
+export type InsertPilotSignup = typeof pilotSignups.$inferInsert;
+export type Setting = typeof settings.$inferSelect;
+export type InsertSetting = typeof settings.$inferInsert;
 
 export const offers = pgTable("offers", {
   id: serial("id").primaryKey(),

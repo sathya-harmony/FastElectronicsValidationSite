@@ -47,7 +47,7 @@ export function LocationPrompt() {
                 </div>
 
                 <div className="bg-blue-50/50 p-3 rounded-lg text-xs text-center text-blue-800">
-                    📍 Optimization: 17km delivery ≈ ₹305 (Linear Calculation)
+
                 </div>
             </DialogContent>
         </Dialog>

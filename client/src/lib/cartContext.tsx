@@ -77,6 +77,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const { userLocation, calculateDistance } = useLocation();
   const [stores, setStores] = useState<any[]>([]);
+  const [pricingMode, setPricingMode] = useState<string>("dynamic");
 
   useEffect(() => {
     // Fetch stores to get lat/lng
@@ -84,6 +85,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       .then(res => res.json())
       .then(data => setStores(data))
       .catch(err => console.error("Failed to fetch stores", err));
+
+    // Fetch pricing settings
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => setPricingMode(data.pricing_mode || "dynamic"))
+      .catch(() => setPricingMode("dynamic"));
   }, []);
 
   const getDeliveryBreakdown = (): DeliveryBreakdown => {
@@ -113,12 +120,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
         // Debug log for user visibility
         console.log(`[Delivery] Store: ${storeName}, Dist: ${distance}km, Loc: ${userLocation ? 'Yes' : 'No'}`);
 
-        const dynamicFee = Math.round(PRICING_CONFIG.deliveryBaseFee + (PRICING_CONFIG.deliveryPerKmFee * distance));
+        let fee = Math.round(PRICING_CONFIG.deliveryBaseFee + (PRICING_CONFIG.deliveryPerKmFee * distance));
+
+        if (pricingMode === 'flat_100') fee = 100;
+        if (pricingMode === 'flat_150') fee = 150;
 
         return {
           storeId,
           storeName,
-          fee: dynamicFee,
+          fee: fee,
         };
       }
     );

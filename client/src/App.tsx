@@ -12,6 +12,7 @@ import StorePage from "@/pages/Store";
 import CartPage from "@/pages/Cart";
 import AdminDashboard from "@/pages/Admin";
 import ContactPage from "@/pages/Contact";
+import SurveyPage from "@/pages/Survey";
 import { LocationPrompt } from "@/components/modules/LocationPrompt";
 
 import { useLocation } from "wouter";
@@ -38,6 +39,7 @@ function Router() {
           <Route path="/cart" component={CartPage} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/contact" component={ContactPage} />
+          <Route path="/survey" component={SurveyPage} />
           <Route component={NotFound} />
         </Switch>
       </motion.div>

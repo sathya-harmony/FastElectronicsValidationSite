@@ -15,7 +15,8 @@ import {
   products,
   offers,
   pilotSignups,
-  clickEvents
+  clickEvents,
+  settings
 } from "../shared/schema.js";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, ilike, sql, and, desc, or } from "drizzle-orm";
@@ -59,6 +60,9 @@ export interface IStorage {
   }>;
 
   resetAnalytics(): Promise<void>;
+
+  getSetting(key: string): Promise<string | undefined>;
+  updateSetting(key: string, value: string): Promise<string>;
 }
 
 const pool = new Pool({
@@ -247,6 +251,23 @@ export class DbStorage implements IStorage {
   async resetAnalytics(): Promise<void> {
     await db.delete(clickEvents);
     await db.delete(pilotSignups);
+  }
+
+  async getSetting(key: string): Promise<string | undefined> {
+    const result = await db.select().from(settings).where(eq(settings.key, key));
+    return result[0]?.value;
+  }
+
+  async updateSetting(key: string, value: string): Promise<string> {
+    const existing = await this.getSetting(key);
+    if (existing) {
+      await db.update(settings)
+        .set({ value, updatedAt: new Date() })
+        .where(eq(settings.key, key));
+    } else {
+      await db.insert(settings).values({ key, value });
+    }
+    return value;
   }
 }
 

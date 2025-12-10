@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { motion } from "framer-motion";
-import { TrendingUp, Users, MousePointer, Package, Store, Calendar, ShoppingCart, Lock, RotateCcw, Trash2, Sparkles } from "lucide-react";
+import { TrendingUp, Users, MousePointer, Package, Store, Calendar, ShoppingCart, Lock, RotateCcw, Trash2, Sparkles, Activity, Percent, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   AlertDialog,
@@ -406,26 +406,30 @@ export default function AdminDashboard() {
           </motion.div>
 
           {/* AI Insights Section */}
-          <motion.div variants={fadeInUp} className="mb-10">
-            <Card className="border-black/5 premium-shadow bg-gradient-to-r from-violet-50 via-white to-white overflow-hidden relative">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Sparkles className="h-32 w-32 text-violet-500" />
-              </div>
-              <CardHeader className="flex flex-row items-center gap-2">
-                <div className="p-2 bg-violet-100 rounded-lg">
-                  <Sparkles className="h-5 w-5 text-violet-600" />
+          <motion.div variants={fadeInUp} className="mb-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <Card className="h-full border-black/5 premium-shadow bg-gradient-to-r from-violet-50 via-white to-white overflow-hidden relative">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                  <Sparkles className="h-32 w-32 text-violet-500" />
                 </div>
-                <div>
-                  <CardTitle className="text-lg text-violet-900">AI Pilot Analyzer</CardTitle>
-                  <p className="text-xs text-muted-foreground">Automated business intelligence</p>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 relative z-10">
-                  <AIInsights authToken={authToken} />
-                </div>
-              </CardContent>
-            </Card>
+                <CardHeader className="flex flex-row items-center gap-2">
+                  <div className="p-2 bg-violet-100 rounded-lg">
+                    <Sparkles className="h-5 w-5 text-violet-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg text-violet-900">AI Pilot Analyzer</CardTitle>
+                    <p className="text-xs text-muted-foreground">Automated business intelligence</p>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 relative z-10">
+                    <AIInsights authToken={authToken} />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <PricingControl authToken={authToken} />
           </motion.div>
 
           <motion.div
@@ -467,14 +471,14 @@ export default function AdminDashboard() {
             <motion.div variants={fadeInUp}>
               <Card className="border-black/5 premium-shadow hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Pilot Signups</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Lead Opt-in Rate</CardTitle>
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold" data-testid="stat-signups">
-                    {stats?.signupCount || 0}
+                  <div className="text-3xl font-bold" data-testid="stat-optin-rate">
+                    {stats?.totalClicks ? ((stats.signupCount / stats.totalClicks) * 100).toFixed(1) : 0}%
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Waitlist registrations</p>
+                  <p className="text-xs text-muted-foreground mt-1">Waitlist / Visitors</p>
                 </CardContent>
               </Card>
             </motion.div>
