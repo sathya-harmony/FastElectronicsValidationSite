@@ -265,7 +265,7 @@ export default function Home() {
                     <ProductCard
                       product={product}
                       offer={offer}
-                      storeName={getStoreById(offer.storeId)?.name || "Store"}
+                      store={getStoreById(offer.storeId)}
                     />
                   </motion.div>
                 ))}
