@@ -221,9 +221,9 @@ export class DbStorage implements IStorage {
     const totalClicks = Number(totalClicksResult[0]?.count || 0);
 
     const uniqueVisitorsResult = await db
-      .select({ count: sql<number>`count(distinct ${clickEvents.sessionId})` })
+      .select({ count: sql<number>`count(distinct ${clickEvents.ipAddress})` })
       .from(clickEvents)
-      .where(sql`${clickEvents.sessionId} IS NOT NULL`);
+      .where(sql`${clickEvents.ipAddress} IS NOT NULL`);
     const uniqueVisitors = Number(uniqueVisitorsResult[0]?.count || 0);
 
     const checkoutClicksResult = await db

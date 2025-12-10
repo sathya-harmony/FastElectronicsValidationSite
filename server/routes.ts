@@ -142,7 +142,10 @@ export function registerRoutes(
         return res.status(400).json({ error: readableError.message });
       }
 
-      const event = await storage.trackClickEvent(validation.data);
+      const event = await storage.trackClickEvent({
+        ...validation.data,
+        ipAddress: req.ip || req.connection.remoteAddress
+      });
       res.status(201).json(event);
     } catch (error) {
       console.error("Error tracking event:", error);
@@ -164,6 +167,7 @@ export function registerRoutes(
       const cleanEvents = events.map(e => ({
         eventType: e.type, // Map 'type' from frontend to 'eventType' in DB
         sessionId: e.sessionId,
+        ipAddress: req.ip || req.connection.remoteAddress,
         metadata: e.data, // Store extra data in metadata
         // Optional fields
         productId: e.data?.productId,

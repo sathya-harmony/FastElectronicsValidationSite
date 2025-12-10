@@ -111,6 +111,7 @@ export const clickEvents = pgTable("click_events", {
   eventType: text("event_type").notNull(),
   searchQuery: text("search_query"),
   sessionId: text("session_id"),
+  ipAddress: text("ip_address"),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
