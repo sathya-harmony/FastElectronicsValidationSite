@@ -2,6 +2,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/modules/Hero";
 import { ProductCard } from "@/components/modules/ProductCard";
+import { LocationPrompt } from "@/components/modules/LocationPrompt";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
@@ -19,8 +20,8 @@ const staggerContainer = {
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
     transition: { duration: 0.6, ease: appleEasing }
   },
@@ -28,8 +29,8 @@ const fadeInUp = {
 
 const scaleIn = {
   hidden: { opacity: 0, scale: 0.95, y: 20 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     scale: 1,
     y: 0,
     transition: { duration: 0.5, ease: appleEasing }
@@ -106,9 +107,10 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1">
+        <LocationPrompt />
         <Hero />
-        
-        <motion.section 
+
+        <motion.section
           className="py-24 bg-secondary/30"
           initial="hidden"
           whileInView="visible"
@@ -116,7 +118,7 @@ export default function Home() {
           variants={staggerContainer}
         >
           <div className="max-w-7xl mx-auto px-6">
-            <motion.div 
+            <motion.div
               className="flex items-end justify-between mb-12"
               variants={fadeInUp}
             >
@@ -125,7 +127,7 @@ export default function Home() {
                 <p className="text-muted-foreground">Premium electronics from trusted local retailers</p>
               </div>
               <Link href="/search?q=">
-                <motion.span 
+                <motion.span
                   className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer"
                   whileHover={{ x: 4 }}
                   transition={{ duration: 0.2 }}
@@ -134,9 +136,9 @@ export default function Home() {
                 </motion.span>
               </Link>
             </motion.div>
-            
+
             {stores.length > 0 ? (
-              <motion.div 
+              <motion.div
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                 variants={staggerContainer}
               >
@@ -147,10 +149,10 @@ export default function Home() {
                     custom={index}
                   >
                     <Link href={`/store/${store.id}`}>
-                      <motion.div 
+                      <motion.div
                         className="group h-full bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden border border-black/5 premium-shadow cursor-pointer"
-                        whileHover={{ 
-                          y: -8, 
+                        whileHover={{
+                          y: -8,
                           boxShadow: "0 30px 60px -15px rgba(0, 0, 0, 0.2)",
                           borderColor: "rgba(0,0,0,0.1)"
                         }}
@@ -159,15 +161,15 @@ export default function Home() {
                       >
                         <div className="h-40 relative overflow-hidden">
                           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10" />
-                          <motion.img 
-                            src={store.logo} 
-                            alt={store.name} 
+                          <motion.img
+                            src={store.logo}
+                            alt={store.name}
                             className="w-full h-full object-cover"
                             whileHover={{ scale: 1.08 }}
                             transition={{ duration: 0.7, ease: appleEasing }}
                           />
                           <div className="absolute bottom-4 left-5 z-20 flex items-center gap-4">
-                            <motion.div 
+                            <motion.div
                               className="h-14 w-14 rounded-2xl bg-white/90 backdrop-blur-sm p-2 shadow-xl"
                               whileHover={{ scale: 1.1, rotate: 5 }}
                               transition={{ type: "spring", stiffness: 300 }}
@@ -182,10 +184,10 @@ export default function Home() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="p-5 space-y-4">
                           <div className="flex justify-between items-center">
-                            <motion.div 
+                            <motion.div
                               className="flex items-center gap-2 px-3 py-1.5 bg-secondary rounded-full text-xs font-medium"
                               whileHover={{ scale: 1.05 }}
                             >
@@ -201,7 +203,7 @@ export default function Home() {
                           </p>
                           <div className="flex justify-between items-center pt-2">
                             <span className="text-sm text-muted-foreground">{store.priceLevel} Pricing</span>
-                            <motion.span 
+                            <motion.span
                               className="text-sm font-semibold text-foreground flex items-center gap-1"
                               whileHover={{ x: 4 }}
                             >
@@ -221,8 +223,8 @@ export default function Home() {
             )}
           </div>
         </motion.section>
-        
-        <motion.section 
+
+        <motion.section
           className="py-24 bg-white"
           initial="hidden"
           whileInView="visible"
@@ -230,7 +232,7 @@ export default function Home() {
           variants={staggerContainer}
         >
           <div className="max-w-7xl mx-auto px-6">
-            <motion.div 
+            <motion.div
               className="flex items-end justify-between mb-12"
               variants={fadeInUp}
             >
@@ -239,7 +241,7 @@ export default function Home() {
                 <p className="text-muted-foreground">Curated selection delivered in 30 minutes</p>
               </div>
               <Link href="/search?q=">
-                <motion.span 
+                <motion.span
                   className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer"
                   whileHover={{ x: 4 }}
                   transition={{ duration: 0.2 }}
@@ -248,20 +250,20 @@ export default function Home() {
                 </motion.span>
               </Link>
             </motion.div>
-            
+
             {productsWithOffers.length > 0 ? (
-              <motion.div 
+              <motion.div
                 className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8"
                 variants={staggerContainer}
               >
                 {productsWithOffers.map(({ product, offer }, index) => (
-                  <motion.div 
+                  <motion.div
                     key={product.id}
                     variants={scaleIn}
                     custom={index}
                   >
-                    <ProductCard 
-                      product={product} 
+                    <ProductCard
+                      product={product}
                       offer={offer}
                       storeName={getStoreById(offer.storeId)?.name || "Store"}
                     />

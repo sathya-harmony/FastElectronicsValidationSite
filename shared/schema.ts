@@ -27,6 +27,8 @@ export const stores = pgTable("stores", {
   logo: text("logo").notNull(),
   description: text("description").notNull(),
   distanceKm: numeric("distance_km", { precision: 5, scale: 2 }).notNull().default("5"),
+  lat: numeric("lat", { precision: 10, scale: 6 }).notNull().default("12.9716"), // Default to Bangalore center
+  lng: numeric("lng", { precision: 10, scale: 6 }).notNull().default("77.5946"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

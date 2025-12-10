@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { PRICING_CONFIG } from "@shared/pricingConfig";
+import { useLocation } from "./locationContext";
 
 interface CartItemWithDetails {
   offerId: number;
@@ -74,20 +75,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const getSubtotal = () =>
     items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const [storeDistances, setStoreDistances] = useState<Record<number, number>>({});
+  const { userLocation, calculateDistance } = useLocation();
+  const [stores, setStores] = useState<any[]>([]);
 
   useEffect(() => {
-    // Fetch stores to get distances
+    // Fetch stores to get lat/lng
     fetch("/api/stores")
       .then(res => res.json())
-      .then((stores: any[]) => {
-        const distances: Record<number, number> = {};
-        stores.forEach(s => {
-          distances[s.id] = Number(s.distanceKm);
-        });
-        setStoreDistances(distances);
-      })
-      .catch(err => console.error("Failed to fetch store distances", err));
+      .then(data => setStores(data))
+      .catch(err => console.error("Failed to fetch stores", err));
   }, []);
 
   const getDeliveryBreakdown = (): DeliveryBreakdown => {
@@ -100,7 +96,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     const storeDeliveryFees = Array.from(uniqueStores.entries()).map(
       ([storeId, storeName]) => {
-        const distance = storeDistances[storeId] || 5; // Default 5km if missing
+        let distance = 5; // Default fallback distance
+        const store = stores.find(s => s.id === storeId);
+
+        if (userLocation && store?.lat && store?.lng) {
+          distance = calculateDistance(
+            userLocation.lat,
+            userLocation.lng,
+            Number(store.lat),
+            Number(store.lng)
+          );
+        } else if (store?.distanceKm) {
+          // Fallback to static distance if user location not enabled
+          distance = Number(store.distanceKm);
+        }
+
         const dynamicFee = Math.round(PRICING_CONFIG.deliveryBaseFee + (PRICING_CONFIG.deliveryPerKmFee * distance));
 
         return {

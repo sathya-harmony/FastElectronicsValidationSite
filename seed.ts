@@ -75,19 +75,25 @@ async function main() {
             name: "Robocraze",
             neighborhood: "Kalyan Nagar",
             deliveryTimeRange: "120-175 min",
-            priceLevel: "$$"
+            priceLevel: "$$",
+            lat: 13.0285,
+            lng: 77.6466
         },
         {
             name: "Vishal Electronics",
             neighborhood: "SP Road",
             deliveryTimeRange: "60-90 min",
-            priceLevel: "$"
+            priceLevel: "$",
+            lat: 12.9654,
+            lng: 77.5800
         },
         {
             name: "Probots",
             neighborhood: "Naagarabhaavi",
             deliveryTimeRange: "60-90 min",
-            priceLevel: "$$"
+            priceLevel: "$$",
+            lat: 12.9615,
+            lng: 77.5181
         }
     ];
 
@@ -97,8 +103,10 @@ async function main() {
             ...s,
             logo: "https://api.dicebear.com/7.x/initials/svg?seed=" + s.name.substring(0, 2),
             description: `Top electronics store in ${s.neighborhood}`,
-            distanceKm: (Math.random() * 5 + 1).toFixed(1),
-            rating: (Math.random() * 1 + 4).toFixed(1)
+            distanceKm: "5", // Default, will be calculated dynamically on frontend
+            rating: (Math.random() * 1 + 4).toFixed(1),
+            lat: s.lat.toString(),
+            lng: s.lng.toString()
         });
         createdStores.push(store);
         console.log(`Created Store: ${store.name}`);
