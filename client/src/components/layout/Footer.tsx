@@ -13,8 +13,8 @@ const staggerContainer = {
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
     transition: { duration: 0.4, ease: appleEasing }
   },
@@ -22,7 +22,7 @@ const fadeInUp = {
 
 const footerLinks = [
   {
-    title: "ThunderFast",
+    title: "Rapid Electronics",
     links: [
       { href: "/about", label: "About Us" },
       { href: "/careers", label: "Careers" },
@@ -53,7 +53,7 @@ const footerLinks = [
 
 export function Footer() {
   return (
-    <motion.footer 
+    <motion.footer
       className="border-t border-black/5 bg-secondary/30 py-16"
       initial="hidden"
       whileInView="visible"
@@ -83,12 +83,12 @@ export function Footer() {
             </motion.div>
           ))}
         </div>
-        <motion.div 
+        <motion.div
           className="border-t border-black/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground"
           variants={fadeInUp}
         >
-          <p>© 2024 ThunderFast Electronics. All rights reserved.</p>
-          <motion.div 
+          <p>© 2024 Rapid Electronics. All rights reserved.</p>
+          <motion.div
             className="flex items-center gap-6"
             whileHover={{ scale: 1.02 }}
           >

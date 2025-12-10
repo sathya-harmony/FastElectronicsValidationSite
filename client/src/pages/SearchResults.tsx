@@ -57,11 +57,17 @@ export default function SearchResults() {
     const { data: products = [], isLoading } = useQuery<Product[]>({
         queryKey: ["search", query],
         queryFn: async () => {
-            const res = await fetch(`/api/products/search?q=${encodeURIComponent(query)}`);
-            if (!res.ok) throw new Error("Failed to search products");
+            // If query is empty, fetch all products
+            const endpoint = query
+                ? `/api/products/search?q=${encodeURIComponent(query)}`
+                : `/api/products`;
+
+            const res = await fetch(endpoint);
+            if (!res.ok) throw new Error("Failed to fetch products");
             return res.json();
         },
-        enabled: !!query,
+        // Always enable, so we load all products by default
+        enabled: true,
     });
 
     const { data: offers = [] } = useQuery<Offer[]>({
@@ -106,9 +112,15 @@ export default function SearchResults() {
                                 <Search className="h-6 w-6 text-foreground" />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-bold tracking-tight">Search Results</h1>
+                                <h1 className="text-3xl font-bold tracking-tight">
+                                    {query ? "Search Results" : "All Products"}
+                                </h1>
                                 <p className="text-muted-foreground">
-                                    Showing results for <span className="font-semibold text-primary">"{query}"</span>
+                                    {query ? (
+                                        <>Showing results for <span className="font-semibold text-primary">"{query}"</span></>
+                                    ) : (
+                                        "Browse our complete catalog of components"
+                                    )}
                                 </p>
                             </div>
                         </div>
