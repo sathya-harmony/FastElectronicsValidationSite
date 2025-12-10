@@ -12,18 +12,34 @@ import CartPage from "@/pages/Cart";
 import AdminDashboard from "@/pages/Admin";
 import ContactPage from "@/pages/Contact";
 
+import { useLocation } from "wouter";
+import { AnimatePresence, motion } from "framer-motion";
+
 function Router() {
+  const [location] = useLocation();
+
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/search" component={SearchPage} />
-      <Route path="/store/:id" component={StorePage} />
-      <Route path="/stores" component={Home} />
-      <Route path="/cart" component={CartPage} />
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/contact" component={ContactPage} />
-      <Route component={NotFound} />
-    </Switch>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location}
+        initial={{ opacity: 0, y: 10, scale: 0.99 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -10, scale: 0.99 }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }} // Apple-style easing
+        className="w-full min-h-screen"
+      >
+        <Switch location={location}>
+          <Route path="/" component={Home} />
+          <Route path="/search" component={SearchPage} />
+          <Route path="/store/:id" component={StorePage} />
+          <Route path="/stores" component={Home} />
+          <Route path="/cart" component={CartPage} />
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/contact" component={ContactPage} />
+          <Route component={NotFound} />
+        </Switch>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

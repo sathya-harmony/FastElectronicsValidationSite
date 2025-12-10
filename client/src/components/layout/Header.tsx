@@ -22,16 +22,16 @@ export function Header() {
   };
 
   return (
-    <motion.header 
-      className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10"
+    <motion.header
+      className="fixed top-0 left-0 right-0 z-50 apple-glass border-b border-white/20"
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: appleEasing }}
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/">
-          <motion.span 
-            className="text-base font-semibold tracking-tight text-foreground cursor-pointer" 
+          <motion.span
+            className="text-base font-semibold tracking-tight text-foreground cursor-pointer"
             data-testid="link-home"
             whileHover={{ opacity: 0.7 }}
             transition={{ duration: 0.2 }}
@@ -62,7 +62,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <motion.button 
+          <motion.button
             onClick={() => setSearchOpen(!searchOpen)}
             className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-black/5 rounded-full transition-colors duration-300"
             data-testid="button-search"
@@ -93,19 +93,19 @@ export function Header() {
               )}
             </AnimatePresence>
           </motion.button>
-          
-          <motion.button 
-            className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-black/5 rounded-full transition-colors duration-300" 
+
+          <motion.button
+            className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-black/5 rounded-full transition-colors duration-300"
             data-testid="button-user"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
           >
             <User className="h-5 w-5" />
           </motion.button>
-          
+
           <Link href="/cart">
-            <motion.span 
-              className="relative p-2.5 text-muted-foreground hover:text-foreground hover:bg-black/5 rounded-full transition-colors duration-300 block cursor-pointer" 
+            <motion.span
+              className="relative p-2.5 text-muted-foreground hover:text-foreground hover:bg-black/5 rounded-full transition-colors duration-300 block cursor-pointer"
               data-testid="button-cart"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -113,7 +113,7 @@ export function Header() {
               <ShoppingBag className="h-5 w-5" />
               <AnimatePresence>
                 {itemCount > 0 && (
-                  <motion.span 
+                  <motion.span
                     className="absolute -top-0.5 -right-0.5 bg-black text-white text-[10px] font-semibold rounded-full h-5 w-5 flex items-center justify-center shadow-lg"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
@@ -128,10 +128,10 @@ export function Header() {
           </Link>
         </div>
       </div>
-      
+
       <AnimatePresence>
         {searchOpen && (
-          <motion.div 
+          <motion.div
             className="border-t border-white/10 glass overflow-hidden"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -140,9 +140,9 @@ export function Header() {
           >
             <div className="max-w-7xl mx-auto px-6 py-4">
               <form onSubmit={handleSearch} className="flex gap-3">
-                <motion.input 
-                  type="search" 
-                  placeholder="Search products, categories..." 
+                <motion.input
+                  type="search"
+                  placeholder="Search products, categories..."
                   className="flex-1 px-5 py-3.5 text-sm bg-white/60 border border-black/5 rounded-full focus:outline-none focus:ring-2 focus:ring-black/10 transition-all duration-300"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -152,7 +152,7 @@ export function Header() {
                   transition={{ delay: 0.1, duration: 0.3 }}
                   data-testid="input-search"
                 />
-                <motion.button 
+                <motion.button
                   type="submit"
                   className="px-8 py-3.5 text-sm font-medium bg-black text-white rounded-full shadow-lg"
                   whileHover={{ scale: 1.03, boxShadow: "0 20px 40px -15px rgba(0,0,0,0.3)" }}

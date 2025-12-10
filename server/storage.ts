@@ -58,7 +58,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
-const db = drizzle(pool);
+export const db = drizzle(pool);
 
 export class DbStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
