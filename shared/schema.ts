@@ -47,6 +47,7 @@ export const products = pgTable("products", {
   specs: jsonb("specs").notNull().$type<string[]>(),
   datasheetUrl: text("datasheet_url"),
   suitability: text("suitability"),
+  longDescription: text("long_description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

@@ -37,6 +37,7 @@ export interface IStorage {
   getProductBySku(sku: string): Promise<Product | undefined>;
   searchProducts(query: string): Promise<Product[]>;
   createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
   deleteAllProducts(): Promise<void>;
 
   getAllOffers(): Promise<Offer[]>;
@@ -132,6 +133,12 @@ export class DbStorage implements IStorage {
   async createProduct(product: InsertProduct): Promise<Product> {
     const result = await db.insert(products).values(product as any).returning();
     if (!result[0]) throw new Error("Failed to create product");
+    return result[0];
+  }
+
+  async updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product> {
+    const result = await db.update(products).set(product as any).where(eq(products.id, id)).returning();
+    if (!result[0]) throw new Error("Failed to update product");
     return result[0];
   }
 
