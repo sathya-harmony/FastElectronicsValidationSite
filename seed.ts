@@ -1,3 +1,4 @@
+
 import { storage } from "./server/storage.js";
 import { type InsertStore, type InsertProduct, type InsertOffer } from "./shared/schema";
 
@@ -63,6 +64,8 @@ async function main() {
 
     // Clear existing data
     try {
+        await storage.deleteAllClickEvents();
+        await storage.deleteAllCartItems();
         await storage.deleteAllOffers();
         await storage.deleteAllProducts();
         await storage.deleteAllStores();
@@ -100,17 +103,25 @@ async function main() {
 
     const createdStores: any[] = [];
     for (const s of storesData) {
-        const store = await storage.createStore({
-            ...s,
-            logo: "https://api.dicebear.com/7.x/initials/svg?seed=" + s.name.substring(0, 2),
-            description: `Top electronics store in ${s.neighborhood}`,
-            distanceKm: "5", // Default, will be calculated dynamically on frontend
-            rating: (Math.random() * 1 + 4).toFixed(1),
-            lat: s.lat.toString(),
-            lng: s.lng.toString()
-        });
-        createdStores.push(store);
-        console.log(`Created Store: ${store.name}`);
+        console.log("Creating store:", s.name);
+        try {
+            const store = await storage.createStore({
+                ...s,
+                logo: "https://api.dicebear.com/7.x/initials/svg?seed=" + s.name.substring(0, 2),
+                description: `Top electronics store in ${s.neighborhood}`,
+                distanceKm: "5", // Default, will be calculated dynamically on frontend
+                rating: (Math.random() * 1 + 4).toFixed(1),
+                lat: s.lat.toString(),
+                lng: s.lng.toString()
+            });
+            createdStores.push(store);
+            console.log(`Created Store: ${store.name}`);
+        } catch (err: any) {
+            console.error("FAILED to create store:", s.name);
+            console.error(err.message);
+            console.error(err.stack);
+            throw err;
+        }
     }
 
     // 2. Create Products
@@ -136,10 +147,6 @@ async function main() {
     }
 
     // 3. Create Offers (Inventory)
-    // Rule: Robocraze (Index 0): All 50 products
-    // Rule: Vishal (Index 1): Random 40 products
-    // Rule: Probots (Index 2): Random 40 products
-
     // Helper to parse price range "100-200"
     const getPrice = (range: string) => {
         const [min, max] = range.split('-').map(Number);

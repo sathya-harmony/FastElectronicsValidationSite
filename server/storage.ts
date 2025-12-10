@@ -16,6 +16,7 @@ import {
   offers,
   pilotSignups,
   clickEvents,
+  cartItems,
   settings
 } from "../shared/schema.js";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -61,6 +62,8 @@ export interface IStorage {
   }>;
 
   resetAnalytics(): Promise<void>;
+  deleteAllClickEvents(): Promise<void>;
+  deleteAllCartItems(): Promise<void>;
 
   getSetting(key: string): Promise<string | undefined>;
   updateSetting(key: string, value: string): Promise<string>;
@@ -256,6 +259,14 @@ export class DbStorage implements IStorage {
   async resetAnalytics(): Promise<void> {
     await db.delete(clickEvents);
     await db.delete(pilotSignups);
+  }
+
+  async deleteAllClickEvents(): Promise<void> {
+    await db.delete(clickEvents);
+  }
+
+  async deleteAllCartItems(): Promise<void> {
+    await db.delete(cartItems);
   }
 
   async getSetting(key: string): Promise<string | undefined> {

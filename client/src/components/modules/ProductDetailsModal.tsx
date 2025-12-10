@@ -34,6 +34,7 @@ export function ProductDetailsModal({ isOpen, onClose, product, offer, storeName
     const handleAddToCart = () => {
         addToCart({
             offerId: Number(offer.id),
+            productId: Number(product.id),
             quantity: 1,
             productName: product.name,
             productImage: product.image,
