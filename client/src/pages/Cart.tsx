@@ -65,7 +65,7 @@ export default function CartPage() {
       return;
     }
 
-    analytics.track('checkout_init', {
+    analytics.track('checkout', {
       cartTotal: getTotal(),
       itemCount: items.length,
       items: items.map(i => ({ id: i.productId, name: i.productName }))

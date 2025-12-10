@@ -58,6 +58,7 @@ export interface IStorage {
     totalClicks: number,
     uniqueVisitors: number,
     checkoutClicks: number,
+    paymentClicks: number,
     topSearches: { query: string, count: number }[],
     paymentMethods: { method: string, count: number }[]
   }>;
@@ -212,6 +213,7 @@ export class DbStorage implements IStorage {
     totalClicks: number,
     uniqueVisitors: number,
     checkoutClicks: number,
+    paymentClicks: number,
     topSearches: { query: string, count: number }[],
     paymentMethods: { method: string, count: number }[]
   }> {
@@ -229,6 +231,12 @@ export class DbStorage implements IStorage {
       .from(clickEvents)
       .where(eq(clickEvents.eventType, 'checkout'));
     const checkoutClicks = Number(checkoutClicksResult[0]?.count || 0);
+
+    const paymentClicksResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(clickEvents)
+      .where(eq(clickEvents.eventType, 'payment_option_selected'));
+    const paymentClicks = Number(paymentClicksResult[0]?.count || 0);
 
     const topSearchesResult = await db
       .select({
@@ -261,7 +269,7 @@ export class DbStorage implements IStorage {
       count: Number(r.count)
     }));
 
-    return { totalClicks, uniqueVisitors, checkoutClicks, topSearches, paymentMethods };
+    return { totalClicks, uniqueVisitors, checkoutClicks, paymentClicks, topSearches, paymentMethods };
   }
 
   async resetAnalytics(): Promise<void> {

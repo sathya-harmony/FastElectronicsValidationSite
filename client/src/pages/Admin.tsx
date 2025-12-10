@@ -25,6 +25,7 @@ interface AdminStats {
   totalClicks: number;
   uniqueVisitors: number;
   checkoutClicks: number;
+  paymentClicks: number;
   topSearches: { query: string; count: number }[];
   paymentMethods: { method: string; count: number }[];
   signupCount: number;
@@ -543,6 +544,21 @@ export default function AdminDashboard() {
                     {stats?.checkoutClicks?.toLocaleString() || 0}
                   </div>
                   <p className="text-xs text-emerald-600 mt-1">Proceed to checkout</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div variants={fadeInUp}>
+              <Card className="border-black/5 premium-shadow hover:shadow-lg transition-shadow bg-gradient-to-br from-indigo-50 to-white">
+                <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-indigo-700">Payment Clicks</CardTitle>
+                  <MousePointer className="h-4 w-4 text-indigo-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-indigo-700" data-testid="stat-payment-clicks">
+                    {stats?.paymentClicks?.toLocaleString() || 0}
+                  </div>
+                  <p className="text-xs text-indigo-600 mt-1">Total payment attempts</p>
                 </CardContent>
               </Card>
             </motion.div>

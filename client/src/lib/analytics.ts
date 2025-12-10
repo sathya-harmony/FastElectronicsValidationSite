@@ -6,6 +6,7 @@ export type EventType =
     | 'click'
     | 'scroll_depth'
     | 'add_to_cart'
+    | 'checkout'
     | 'checkout_init'
     | 'checkout_complete'
     | 'pilot_signup'

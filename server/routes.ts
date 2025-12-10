@@ -272,6 +272,7 @@ export function registerRoutes(
       totalClicks: number,
       uniqueVisitors: number,
       checkoutClicks: number,
+      paymentClicks: number,
       paymentMethods: { method: string, count: number }[],
       topSearches: { query: string, count: number }[]
     },
