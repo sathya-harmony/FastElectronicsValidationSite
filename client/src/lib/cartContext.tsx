@@ -97,9 +97,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const storeDeliveryFees = Array.from(uniqueStores.entries()).map(
       ([storeId, storeName]) => {
         let distance = 5; // Default fallback distance
-        const store = stores.find(s => s.id === storeId);
+        const store = stores.find(s => Number(s.id) === Number(storeId));
 
-        if (userLocation && store?.lat && store?.lng) {
+        if (userLocation && store && store.lat && store.lng) {
           distance = calculateDistance(
             userLocation.lat,
             userLocation.lng,
@@ -107,9 +107,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
             Number(store.lng)
           );
         } else if (store?.distanceKm) {
-          // Fallback to static distance if user location not enabled
           distance = Number(store.distanceKm);
         }
+
+        // Debug log for user visibility
+        console.log(`[Delivery] Store: ${storeName}, Dist: ${distance}km, Loc: ${userLocation ? 'Yes' : 'No'}`);
 
         const dynamicFee = Math.round(PRICING_CONFIG.deliveryBaseFee + (PRICING_CONFIG.deliveryPerKmFee * distance));
 

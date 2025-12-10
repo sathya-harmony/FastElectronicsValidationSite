@@ -111,7 +111,7 @@ export default function CartPage() {
                     <div className="flex justify-between items-center mb-6">
                       <h3 className="font-bold text-lg">{storeName}</h3>
                       <span className="text-sm text-muted-foreground px-3 py-1 bg-secondary rounded-full">
-                        Delivery: ₹{PRICING_CONFIG.deliveryFeePerStore}
+                        Delivery: ₹{deliveryBreakdown.storeDeliveryFees.find(f => f.storeId === Number(storeId))?.fee || 0}
                       </span>
                     </div>
                     <div className="space-y-5">
