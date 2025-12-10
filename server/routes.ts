@@ -236,5 +236,81 @@ export function registerRoutes(
     }
   });
 
+  // AI Insight Generator
+  function generateInsights(
+    stats: {
+      totalClicks: number,
+      checkoutClicks: number,
+      paymentMethods: { method: string, count: number }[],
+      topSearches: { query: string, count: number }[]
+    },
+    signupCount: number
+  ): string[] {
+    const insights: string[] = [];
+
+    // 1. Conversion Analysis
+    if (stats.totalClicks > 0) {
+      const checkoutRate = (stats.checkoutClicks / stats.totalClicks) * 100;
+      if (checkoutRate < 5) {
+        insights.push("⚠️ Low Checkout conversion (<5%). Users are browsing but not buying. unexpected high prices might be the cause.");
+      } else if (checkoutRate > 15) {
+        insights.push("🚀 Strong purchase intent detected! Checkout rate is above 15%, indicating excellent product-market fit.");
+      }
+
+      const signupRate = (signupCount / stats.checkoutClicks) * 100;
+      if (signupRate > 50) {
+        insights.push("⭐ High Trust Signal: Over 50% of users attempting checkout are joining the pilot waitlist.");
+      }
+    }
+
+    // 2. Payment Preferences
+    if (stats.paymentMethods.length > 0) {
+      const totalPayments = stats.paymentMethods.reduce((a, b) => a + b.count, 0);
+      const upi = stats.paymentMethods.find(p => p.method === 'upi')?.count || 0;
+      const cod = stats.paymentMethods.find(p => p.method === 'cod')?.count || 0;
+
+      if ((upi / totalPayments) > 0.6) {
+        insights.push("💳 Digital Native Audience: UPI is heavily preferred (>60%). Ensure QR codes are prominent in the final app.");
+      }
+      if ((cod / totalPayments) > 0.4) {
+        insights.push("🏠 Traditional Buyers: High COD demand (>40%). Logistics partner must support cash handling.");
+      }
+    }
+
+    // 3. Demand Signals
+    if (stats.topSearches.length > 0) {
+      const topTerm = stats.topSearches[0].query;
+      insights.push(`🔍 Top Search Trend: Users are actively looking for "${topTerm}". Consider stocking more variations.`);
+    }
+
+    if (insights.length === 0) {
+      insights.push("Waiting for more data to generate smart insights...");
+    }
+
+    return insights;
+  }
+
+  app.post("/api/admin/analyze", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "No token provided" });
+      }
+      const token = authHeader.substring(7);
+      if (!validateToken(token)) {
+        return res.status(401).json({ error: "Invalid or expired token" });
+      }
+
+      const stats = await storage.getClickStats();
+      const signups = await storage.getAllPilotSignups();
+
+      const insights = generateInsights(stats, signups.length);
+      res.json({ insights });
+    } catch (error) {
+      console.error("Error analyzing data:", error);
+      res.status(500).json({ error: "Failed to generate insights" });
+    }
+  });
+
   return httpServer;
 }

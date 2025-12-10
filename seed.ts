@@ -2,6 +2,7 @@ import { storage } from "./server/storage.js";
 import { type InsertStore, type InsertProduct, type InsertOffer } from "./shared/schema";
 
 import { IMAGES } from "./shared/images";
+import { PRICING_CONFIG } from "./shared/pricingConfig";
 
 const ITEMS = [
     ["Arduino UNO R3", "Microcontroller Board", "500-1750", "The classic Arduino board for beginners and pros."],
@@ -134,17 +135,32 @@ async function main() {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     };
 
+    // Helper to calculate price with margin and psychology pricing
+    const calculateSellingPrice = (basePrice: number) => {
+        const withMargin = basePrice * (1 + PRICING_CONFIG.marginPercentage);
+        // Round to nearest 9 (e.g. 153 -> 159, 141 -> 149)
+        return Math.floor(withMargin / 10) * 10 + 9;
+    };
+
+    // Helper to calculate delivery fee
+    const calculateDeliveryFee = (distanceKm: number) => {
+        return Math.round(PRICING_CONFIG.deliveryBaseFee + (PRICING_CONFIG.deliveryPerKmFee * distanceKm));
+    };
+
     // Robocraze (All 50)
     for (const { product, priceRange } of createdProducts) {
-        const price = getPrice(priceRange);
+        const basePrice = getPrice(priceRange);
+        const sellingPrice = calculateSellingPrice(basePrice);
+        const store = createdStores[0];
+
         await storage.createOffer({
             productId: product.id,
-            storeId: createdStores[0].id,
-            basePrice: price,
-            price: price, // No discount for now
-            eta: 120 + Math.floor(Math.random() * 55), // Within 120-175 roughly
+            storeId: store.id,
+            basePrice: basePrice,
+            price: sellingPrice,
+            eta: 120 + Math.floor(Math.random() * 55),
             stock: 100,
-            displayedDeliveryFee: 40
+            displayedDeliveryFee: calculateDeliveryFee(Number(store.distanceKm))
         });
     }
     console.log("Stocked Robocraze with 50 items");
@@ -152,15 +168,18 @@ async function main() {
     // Vishal (Random 40)
     const vishalProducts = [...createdProducts].sort(() => 0.5 - Math.random()).slice(0, 40);
     for (const { product, priceRange } of vishalProducts) {
-        const price = getPrice(priceRange);
+        const basePrice = getPrice(priceRange);
+        const sellingPrice = calculateSellingPrice(basePrice);
+        const store = createdStores[1];
+
         await storage.createOffer({
             productId: product.id,
-            storeId: createdStores[1].id,
-            basePrice: price,
-            price: price,
-            eta: 60 + Math.floor(Math.random() * 30), // Within 60-90
+            storeId: store.id,
+            basePrice: basePrice,
+            price: sellingPrice,
+            eta: 60 + Math.floor(Math.random() * 30),
             stock: 50,
-            displayedDeliveryFee: 30
+            displayedDeliveryFee: calculateDeliveryFee(Number(store.distanceKm))
         });
     }
     console.log("Stocked Vishal Electronics with 40 items");
@@ -168,15 +187,18 @@ async function main() {
     // Probots (Random 40)
     const probotsProducts = [...createdProducts].sort(() => 0.5 - Math.random()).slice(0, 40);
     for (const { product, priceRange } of probotsProducts) {
-        const price = getPrice(priceRange);
+        const basePrice = getPrice(priceRange);
+        const sellingPrice = calculateSellingPrice(basePrice);
+        const store = createdStores[2];
+
         await storage.createOffer({
             productId: product.id,
-            storeId: createdStores[2].id,
-            basePrice: price,
-            price: price,
+            storeId: store.id,
+            basePrice: basePrice,
+            price: sellingPrice,
             eta: 60 + Math.floor(Math.random() * 30),
             stock: 60,
-            displayedDeliveryFee: 35
+            displayedDeliveryFee: calculateDeliveryFee(Number(store.distanceKm))
         });
     }
     console.log("Stocked Probots with 40 items");

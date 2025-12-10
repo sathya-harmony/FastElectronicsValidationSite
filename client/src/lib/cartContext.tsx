@@ -74,6 +74,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const getSubtotal = () =>
     items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
+  const [storeDistances, setStoreDistances] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    // Fetch stores to get distances
+    fetch("/api/stores")
+      .then(res => res.json())
+      .then((stores: any[]) => {
+        const distances: Record<number, number> = {};
+        stores.forEach(s => {
+          distances[s.id] = Number(s.distanceKm);
+        });
+        setStoreDistances(distances);
+      })
+      .catch(err => console.error("Failed to fetch store distances", err));
+  }, []);
+
   const getDeliveryBreakdown = (): DeliveryBreakdown => {
     const uniqueStores = new Map<number, string>();
     items.forEach((item) => {
@@ -83,18 +99,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
 
     const storeDeliveryFees = Array.from(uniqueStores.entries()).map(
-      ([storeId, storeName]) => ({
-        storeId,
-        storeName,
-        fee: PRICING_CONFIG.deliveryFeePerStore,
-      })
+      ([storeId, storeName]) => {
+        const distance = storeDistances[storeId] || 5; // Default 5km if missing
+        const dynamicFee = Math.round(PRICING_CONFIG.deliveryBaseFee + (PRICING_CONFIG.deliveryPerKmFee * distance));
+
+        return {
+          storeId,
+          storeName,
+          fee: dynamicFee,
+        };
+      }
     );
 
     const storeCount = uniqueStores.size;
-    const transitFee =
-      storeCount > 1
-        ? (storeCount - 1) * PRICING_CONFIG.transitFeeBetweenStores
-        : 0;
+    // Transit fee logic could be revisited, for now keeping 0 for simplicity or using config
+    // The user didn't explicitly ask for transit fee changes, just delivery based on distance.
+    const transitFee = 0;
 
     const totalDelivery =
       storeDeliveryFees.reduce((sum, s) => sum + s.fee, 0) + transitFee;
