@@ -1,21 +1,13 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { useCart } from "@/lib/cartContext";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Minus, Plus, Trash2, ShoppingBag, CheckCircle } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { PRICING_CONFIG } from "@shared/pricingConfig";
+import { PaymentModal } from "@/components/modules/PaymentModal";
 
 const appleEasing: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
 
@@ -29,8 +21,8 @@ const staggerContainer = {
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
     transition: { duration: 0.5, ease: appleEasing }
   },
@@ -39,33 +31,8 @@ const fadeInUp = {
 export default function CartPage() {
   const { items, updateQuantity, removeFromCart, getSubtotal, getDeliveryBreakdown, getTotal, clearCart } = useCart();
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [signupSuccess, setSignupSuccess] = useState(false);
 
   const deliveryBreakdown = getDeliveryBreakdown();
-
-  const pilotSignup = useMutation({
-    mutationFn: async (data: { email: string; phone: string }) => {
-      const res = await fetch("/api/pilot-signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Signup failed");
-      return res.json();
-    },
-    onSuccess: () => {
-      setSignupSuccess(true);
-      clearCart();
-    },
-  });
-
-  const handleSignup = () => {
-    if (email || phone) {
-      pilotSignup.mutate({ email, phone });
-    }
-  };
 
   const groupedByStore = items.reduce((acc, item) => {
     if (!acc[item.storeId]) {
@@ -80,7 +47,7 @@ export default function CartPage() {
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
         <main className="flex-1 flex items-center justify-center pt-16">
-          <motion.div 
+          <motion.div
             className="text-center py-20"
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -119,7 +86,7 @@ export default function CartPage() {
       <Header />
       <main className="flex-1 pt-24 pb-12">
         <div className="max-w-5xl mx-auto px-6">
-          <motion.h1 
+          <motion.h1
             className="text-3xl font-bold tracking-tight mb-10"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -129,7 +96,7 @@ export default function CartPage() {
           </motion.h1>
 
           <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
-            <motion.div 
+            <motion.div
               className="space-y-6"
               variants={staggerContainer}
               initial="hidden"
@@ -137,8 +104,8 @@ export default function CartPage() {
             >
               {Object.entries(groupedByStore).map(([storeId, { storeName, items: storeItems }]) => (
                 <motion.div key={storeId} variants={fadeInUp}>
-                  <Card 
-                    className="p-6 rounded-3xl bg-white/80 backdrop-blur-sm border-black/5 premium-shadow" 
+                  <Card
+                    className="p-6 rounded-3xl bg-white/80 backdrop-blur-sm border-black/5 premium-shadow"
                     data-testid={`cart-store-${storeId}`}
                   >
                     <div className="flex justify-between items-center mb-6">
@@ -160,7 +127,7 @@ export default function CartPage() {
                             exit={{ opacity: 0, x: 20, height: 0 }}
                             transition={{ duration: 0.3, ease: appleEasing }}
                           >
-                            <motion.div 
+                            <motion.div
                               className="w-24 h-24 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden flex-shrink-0"
                               whileHover={{ scale: 1.05 }}
                             >
@@ -231,7 +198,7 @@ export default function CartPage() {
                     <span className="text-muted-foreground">Subtotal</span>
                     <span className="font-medium">₹{getSubtotal().toLocaleString()}</span>
                   </div>
-                  
+
                   <div className="border-t border-black/5 pt-4 space-y-2">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Delivery Charges</span>
                     {deliveryBreakdown.storeDeliveryFees.map((store) => (
@@ -252,7 +219,7 @@ export default function CartPage() {
                     <span className="text-muted-foreground">Total Delivery</span>
                     <span className="font-medium">₹{deliveryBreakdown.totalDelivery}</span>
                   </div>
-                  
+
                   <div className="border-t border-black/5 pt-4 flex justify-between font-bold text-lg">
                     <span>Total</span>
                     <span>₹{getTotal().toLocaleString()}</span>
@@ -265,7 +232,7 @@ export default function CartPage() {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ eventType: "checkout" }),
-                    }).catch(() => {});
+                    }).catch(() => { });
                     setShowCheckoutModal(true);
                   }}
                   data-testid="button-checkout"
@@ -290,112 +257,11 @@ export default function CartPage() {
       </main>
       <Footer />
 
-      <Dialog open={showCheckoutModal} onOpenChange={setShowCheckoutModal}>
-        <DialogContent className="sm:max-w-md rounded-3xl border-black/5">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
-              {signupSuccess ? "You're on the list!" : "Coming Soon!"}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {signupSuccess ? (
-            <motion.div 
-              className="text-center py-6"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4 }}
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-              >
-                <CheckCircle className="h-20 w-20 mx-auto text-emerald-500 mb-6" />
-              </motion.div>
-              <p className="text-base text-muted-foreground leading-relaxed">
-                Thank you for signing up! Your next order will have <strong className="text-foreground">FREE delivery</strong>. 
-                We'll notify you as soon as we launch!
-              </p>
-              <motion.button
-                className="mt-8 rounded-full px-8 h-12 bg-black text-white font-medium"
-                onClick={() => {
-                  setShowCheckoutModal(false);
-                  setSignupSuccess(false);
-                }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Continue Browsing
-              </motion.button>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="pt-2 space-y-5">
-                <p className="text-muted-foreground leading-relaxed">
-                  We're currently in pilot phase, validating demand before launching our full delivery service in Bangalore.
-                </p>
-                
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/50 rounded-2xl p-5">
-                  <p className="text-sm font-semibold text-amber-900">
-                    Sign up now and get <strong>FREE delivery</strong> on your first order!
-                  </p>
-                  <p className="text-sm text-amber-800/80 mt-2 leading-relaxed">
-                    Skip the SP Road traffic and long store visits. We'll bring electronics to your doorstep in 30-120 minutes!
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <motion.div whileFocus={{ scale: 1.01 }}>
-                    <Input
-                      type="email"
-                      placeholder="Email address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="rounded-xl h-12 border-black/10 focus:border-black/20"
-                      data-testid="input-email"
-                    />
-                  </motion.div>
-                  <motion.div whileFocus={{ scale: 1.01 }}>
-                    <Input
-                      type="tel"
-                      placeholder="Phone number"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="rounded-xl h-12 border-black/10 focus:border-black/20"
-                      data-testid="input-phone"
-                    />
-                  </motion.div>
-                </div>
-              </div>
-              
-              <div className="flex gap-4 mt-6">
-                <motion.button
-                  className="flex-1 rounded-full h-12 border border-black/10 font-medium"
-                  onClick={() => setShowCheckoutModal(false)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Maybe Later
-                </motion.button>
-                <motion.button
-                  className="flex-1 rounded-full h-12 bg-black text-white font-medium shadow-lg disabled:opacity-50"
-                  onClick={handleSignup}
-                  disabled={!email && !phone}
-                  data-testid="button-join-waitlist"
-                  whileHover={email || phone ? { scale: 1.02 } : undefined}
-                  whileTap={email || phone ? { scale: 0.98 } : undefined}
-                >
-                  {pilotSignup.isPending ? "Signing up..." : "Get Free Delivery"}
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <PaymentModal
+        isOpen={showCheckoutModal}
+        onClose={() => setShowCheckoutModal(false)}
+        totalAmount={getTotal()}
+      />
     </div>
   );
 }
