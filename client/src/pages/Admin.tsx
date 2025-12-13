@@ -512,7 +512,7 @@ export default function AdminDashboard() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete all analytics data, including click events, payment attempts, and pilot signups from the database.
+                      This action cannot be undone. This will permanently delete all analytics data, including click events, payment attempts, pilot signups, and user locations (map data) from the database.
                       <br /><br />
                       This is intended for resetting data after testing, before a fresh marketing campaign.
                     </AlertDialogDescription>
