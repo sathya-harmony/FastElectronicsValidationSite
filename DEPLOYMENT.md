@@ -33,6 +33,7 @@ This guide provides a step-by-step roadmap to connecting your application to Sup
     *   Add the following variables in the "Environment Variables" section:
         *   `DATABASE_URL`: Your Supabase connection string (same as in your `.env`).
         *   `ADMIN_PASSWORD`: A secure password for accessing the admin dashboard.
+        *   `VITE_GOOGLE_MAPS_API_KEY`: Your Google Maps API Key (must have Maps JavaScript API enabled).
 5.  **Deploy**: Click **Deploy**.
 
 ## Phase 3: Verification

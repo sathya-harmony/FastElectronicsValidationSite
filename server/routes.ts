@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage.js";
-import { insertPilotSignupSchema, insertClickEventSchema } from "../shared/schema.js";
+import { insertPilotSignupSchema, insertClickEventSchema, insertUserLocationSchema } from "../shared/schema.js";
 import { fromError } from "zod-validation-error";
 import crypto from "crypto";
 
@@ -352,6 +352,42 @@ export function registerRoutes(
       res.status(500).json({ error: "Failed to generate insights" });
     }
 
+  });
+
+  // Location Tracking
+  app.post("/api/location", async (req, res) => {
+    try {
+      const validation = insertUserLocationSchema.safeParse(req.body);
+      if (!validation.success) {
+        const readableError = fromError(validation.error);
+        return res.status(400).json({ error: readableError.message });
+      }
+
+      const location = await storage.logUserLocation(validation.data);
+      res.status(201).json(location);
+    } catch (error) {
+      console.error("Error logging location:", error);
+      res.status(500).json({ error: "Failed to log location" });
+    }
+  });
+
+  app.get("/api/admin/locations", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "No token provided" });
+      }
+      const token = authHeader.substring(7);
+      if (!validateToken(token)) {
+        return res.status(401).json({ error: "Invalid or expired token" });
+      }
+
+      const locations = await storage.getUserLocations();
+      res.json(locations);
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+      res.status(500).json({ error: "Failed to fetch locations" });
+    }
   });
 
   // Settings Routes

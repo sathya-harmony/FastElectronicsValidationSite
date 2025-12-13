@@ -137,3 +137,20 @@ export const insertCartItemSchema = createInsertSchema(cartItems).omit({
 });
 export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
 export type CartItem = typeof cartItems.$inferSelect;
+
+export const userLocations = pgTable("user_locations", {
+  id: serial("id").primaryKey(),
+  lat: numeric("lat", { precision: 10, scale: 6 }).notNull(),
+  lng: numeric("lng", { precision: 10, scale: 6 }).notNull(),
+  accuracy: numeric("accuracy", { precision: 10, scale: 2 }), // Accuracy in meters
+  sessionId: text("session_id"),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
+export const insertUserLocationSchema = createInsertSchema(userLocations).omit({
+  id: true,
+  timestamp: true,
+});
+
+export type InsertUserLocation = z.infer<typeof insertUserLocationSchema>;
+export type UserLocation = typeof userLocations.$inferSelect;

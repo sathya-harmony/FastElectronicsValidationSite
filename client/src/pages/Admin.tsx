@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { motion } from "framer-motion";
-import { TrendingUp, Users, MousePointer, Package, Store, Calendar, ShoppingCart, Lock, RotateCcw, Trash2, Sparkles, Activity, Percent, CheckCircle2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { TrendingUp, Users, MousePointer, Package, Store, Calendar, ShoppingCart, Lock, RotateCcw, Trash2, Sparkles, Activity, Percent, CheckCircle2, MapPin, Download } from "lucide-react";
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { useState, useEffect, useMemo } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -195,6 +196,83 @@ function AIInsights({ authToken }: { authToken: string | null }) {
         </motion.li>
       ))}
     </ul>
+  );
+}
+
+function UserMap({ authToken }: { authToken: string | null }) {
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""
+  });
+
+  const { data: locations = [] } = useQuery<any[]>({
+    queryKey: ["locations", authToken],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/locations", {
+        headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+      });
+      if (!res.ok) throw new Error("Failed to fetch locations");
+      return res.json();
+    },
+    enabled: !!authToken,
+  });
+
+  const center = useMemo(() => ({ lat: 12.9716, lng: 77.5946 }), []);
+
+  const downloadCSV = () => {
+    if (!locations.length) return;
+    const headers = "Latitude,Longitude,Accuracy,Timestamp\n";
+    const rows = locations.map((l: any) => `${l.lat},${l.lng},${l.accuracy},${l.timestamp}`).join("\n");
+    const blob = new Blob([headers + rows], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `user_locations_${new Date().toISOString()}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  if (!import.meta.env.VITE_GOOGLE_MAPS_API_KEY) {
+    return (
+      <Card className="h-[400px] border-black/5 premium-shadow flex items-center justify-center p-6 text-center">
+        <div>
+          <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-lg font-bold">Google Maps Not Configured</h3>
+          <p className="text-sm text-muted-foreground mt-2">
+            Please add <code className="bg-gray-100 p-1 rounded">VITE_GOOGLE_MAPS_API_KEY</code> to your .env file.
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
+  if (!isLoaded) return <div className="h-[400px] bg-gray-100 rounded-xl animate-pulse" />;
+
+  return (
+    <Card className="h-full border-black/5 premium-shadow flex flex-col">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div>
+          <CardTitle className="text-lg">User Activity Map</CardTitle>
+          <p className="text-xs text-muted-foreground">Real-time location drops</p>
+        </div>
+        <Button size="sm" variant="outline" onClick={downloadCSV} disabled={!locations.length} className="gap-2">
+          <Download className="h-4 w-4" /> CSV
+        </Button>
+      </CardHeader>
+      <CardContent className="flex-1 p-0 min-h-[350px] relative">
+        <GoogleMap
+          mapContainerStyle={{ width: '100%', height: '100%', borderRadius: '0 0 0.75rem 0.75rem' }}
+          center={center}
+          zoom={10}
+          options={{ disableDefaultUI: true, zoomControl: true }}
+        >
+          {locations.map((loc: any, idx: number) => (
+            <Marker key={idx} position={{ lat: parseFloat(loc.lat), lng: parseFloat(loc.lng) }} />
+          ))}
+          {/* Bangalore Radius Circle (Visual Guide) - Optional */}
+        </GoogleMap>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -501,6 +579,10 @@ export default function AdminDashboard() {
             </div>
 
             <PricingControl authToken={authToken} />
+          </motion.div>
+
+          <motion.div variants={fadeInUp} className="mb-10">
+            <UserMap authToken={authToken} />
           </motion.div>
 
           <motion.div

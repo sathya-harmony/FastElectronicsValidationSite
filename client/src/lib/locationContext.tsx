@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { LocationPicker } from "@/components/LocationPicker";
 
 interface Coordinates {
     lat: number;
@@ -9,12 +10,14 @@ interface Coordinates {
 interface LocationContextType {
     userLocation: Coordinates | null;
     setUserLocation: (coords: Coordinates | null) => void;
-    requestLocation: () => Promise<void>;
+    requestLocation: () => void;
     calculateDistance: (lat1: number, lon1: number, lat2: number, lon2: number) => number;
-    locationPromptOpen: boolean; // Alias for isLocationPromptOpen for consistency
+    locationPromptOpen: boolean;
     setLocationPromptOpen: (open: boolean) => void;
-    error: string | null; // Alias for locationError
+    error: string | null;
     isLoading: boolean;
+    isPickerOpen: boolean;
+    setIsPickerOpen: (open: boolean) => void;
 }
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
@@ -39,51 +42,58 @@ function deg2rad(deg: number) {
 
 export function LocationProvider({ children }: { children: ReactNode }) {
     const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
-    const [isLocationPromptOpen, setLocationPromptOpen] = useState(true); // Open by default on load
+    const [isLocationPromptOpen, setLocationPromptOpen] = useState(true); // Initial prompt
+    const [isPickerOpen, setIsPickerOpen] = useState(false); // Map Picker
     const [locationError, setLocationError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
-    const requestLocation = async () => {
+    // Bangalore Center (Vidhana Soudha approx)
+    const BLR_CENTER = { lat: 12.9716, lng: 77.5946 };
+
+    const handleLocationConfirm = async (coords: Coordinates) => {
         setIsLoading(true);
-        if (!navigator.geolocation) {
-            setLocationError("Geolocation is not supported by your browser");
+        const dist = getDistanceFromLatLonInKm(BLR_CENTER.lat, BLR_CENTER.lng, coords.lat, coords.lng);
+
+        // Airport is ~30km from center. Allowing 50km radius to cover Greater Bangalore.
+        if (dist > 50) {
+            setLocationError(`We don't serve outside Greater Bangalore. Selected location is ${Math.round(dist)}km away.`);
             setIsLoading(false);
             return;
         }
 
+        // Log location to backend
         try {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    setUserLocation({
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                    });
-                    setLocationPromptOpen(false);
-                    setLocationError(null);
-                    setIsLoading(false);
-                    toast({
-                        title: "Location detected",
-                        description: "Delivery fees updated for your location.",
-                    });
-                },
-                (error) => {
-                    console.error("Error getting location:", error);
-                    let errorMsg = "Unable to retrieve your location";
-                    if (error.code === error.PERMISSION_DENIED) {
-                        errorMsg = "Location permission denied. Using default location.";
-                    }
-                    setLocationError(errorMsg);
-                    setIsLoading(false);
-                    // Fallback to a central Bangalore location or keep null
-                    // Keeping null allows us to show "Calculate Delivery" state
-                }
-            );
-        } catch (err) {
-            console.error(err);
-            setLocationError("An existing location request is already in progress.");
-            setIsLoading(false);
+            await fetch("/api/location", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    lat: coords.lat.toString(),
+                    lng: coords.lng.toString(),
+                    accuracy: "10.00", // High accuracy from manual pin
+                    timestamp: new Date().toISOString()
+                })
+            });
+        } catch (e) {
+            console.error("Failed to log location", e);
         }
+
+        setUserLocation(coords);
+        setLocationPromptOpen(false); // Close initial prompt if open
+        setIsPickerOpen(false); // Close picker
+        setLocationError(null);
+        setIsLoading(false);
+        toast({
+            title: "Location Updated",
+            description: `Delivery location confirmed (${Math.round(dist)}km from center).`,
+        });
+    };
+
+    const requestLocation = () => {
+        // Instead of getting location immediately, we open the picker.
+        // We can optionally try to get current location to center the picker (handled inside Picker)
+        setIsPickerOpen(true);
+        setLocationPromptOpen(false); // Close the simple prompt
     };
 
     return (
@@ -93,13 +103,21 @@ export function LocationProvider({ children }: { children: ReactNode }) {
                 setUserLocation,
                 requestLocation,
                 calculateDistance: getDistanceFromLatLonInKm,
-                locationPromptOpen: isLocationPromptOpen, // Aliased
+                locationPromptOpen: isLocationPromptOpen,
                 setLocationPromptOpen,
-                error: locationError, // Aliased
+                error: locationError,
                 isLoading,
+                isPickerOpen,
+                setIsPickerOpen
             }}
         >
             {children}
+            <LocationPicker
+                isOpen={isPickerOpen}
+                onClose={() => setIsPickerOpen(false)}
+                onConfirm={handleLocationConfirm}
+                initialLocation={userLocation}
+            />
         </LocationContext.Provider>
     );
 }

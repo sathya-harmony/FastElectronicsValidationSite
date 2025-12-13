@@ -241,7 +241,7 @@ export default function Home() {
             >
               <div>
                 <h2 className="text-3xl font-bold tracking-tight mb-2">Featured Products</h2>
-                <p className="text-muted-foreground">Curated selection delivered in 30 minutes</p>
+                <p className="text-muted-foreground">Curated selection delivered in 60 minutes</p>
               </div>
               <Link href="/search?q=">
                 <motion.span

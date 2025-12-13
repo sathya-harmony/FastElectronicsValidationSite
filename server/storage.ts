@@ -17,7 +17,10 @@ import {
   pilotSignups,
   clickEvents,
   cartItems,
-  settings
+  settings,
+  type UserLocation,
+  type InsertUserLocation,
+  userLocations
 } from "../shared/schema.js";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, ilike, sql, and, desc, or } from "drizzle-orm";
@@ -70,6 +73,9 @@ export interface IStorage {
 
   getSetting(key: string): Promise<string | undefined>;
   updateSetting(key: string, value: string): Promise<string>;
+
+  logUserLocation(location: InsertUserLocation): Promise<UserLocation>;
+  getUserLocations(): Promise<UserLocation[]>;
 }
 
 const pool = new Pool({
@@ -311,6 +317,15 @@ export class DbStorage implements IStorage {
       await db.insert(settings).values({ key, value });
     }
     return value;
+  }
+
+  async logUserLocation(location: InsertUserLocation): Promise<UserLocation> {
+    const [savedLocation] = await db.insert(userLocations).values(location).returning();
+    return savedLocation;
+  }
+
+  async getUserLocations(): Promise<UserLocation[]> {
+    return await db.select().from(userLocations).orderBy(desc(userLocations.timestamp));
   }
 }
 
