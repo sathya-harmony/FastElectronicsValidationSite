@@ -261,7 +261,7 @@ function UserMap({ authToken }: { authToken: string | null }) {
       </CardHeader>
       <CardContent className="flex-1 p-0 min-h-[350px] relative">
         <GoogleMap
-          mapContainerStyle={{ width: '100%', height: '400px', borderRadius: '0 0 0.75rem 0.75rem' }}
+          mapContainerStyle={{ width: '100%', height: '100%', borderRadius: '0 0 0.75rem 0.75rem' }}
           center={center}
           zoom={10}
           options={{ disableDefaultUI: true, zoomControl: true }}

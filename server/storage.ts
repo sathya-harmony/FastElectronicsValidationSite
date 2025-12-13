@@ -292,6 +292,7 @@ export class DbStorage implements IStorage {
   async resetAnalytics(): Promise<void> {
     await db.delete(clickEvents);
     await db.delete(pilotSignups);
+    await db.delete(userLocations);
   }
 
   async deleteAllClickEvents(): Promise<void> {
